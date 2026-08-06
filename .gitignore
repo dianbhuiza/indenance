@@ -90,3 +90,4 @@ docker-data/
 # =========================
 *.pid
 *.seed
+postgres-data/
