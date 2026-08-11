@@ -2,3 +2,9 @@ packages:
   - apps/*
   - packages/*
   - services/*
+
+onlyBuiltDependencies:
+  - '@prisma/engines'
+  - '@scarf/scarf'
+  - prisma
+  - unrs-resolver

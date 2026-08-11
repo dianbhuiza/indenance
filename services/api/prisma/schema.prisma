@@ -13,14 +13,29 @@ datasource db {
 }
 
 model User {
-  id       String    @id @default(uuid())
-  email    String    @unique
-  name     String?
-  password String
-  phone    String?
-  accounts Account[]
-  tenant   Tenant?   @relation(fields: [tenantId], references: [id])
-  tenantId String?
+  id          String       @id @default(uuid())
+  email       String       @unique
+  name        String?
+  phone       String?
+  accounts    Account[]
+  tenant      Tenant?      @relation(fields: [tenantId], references: [id])
+  tenantId    String?
+  authMethods AuthMethod[]
+}
+
+model AuthMethod {
+  id                String   @id @default(uuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider          String
+  providerAccountId String
+  accessToken       String?
+  refreshToken      String?
+  expiresAt         Int?
+  password          String?
+  createdAt         DateTime @default(now())
+
+  @@unique([provider, providerAccountId])
 }
 
 model Tenant {
@@ -128,5 +143,3 @@ model ShoppingListItem {
   category       Category?    @relation(fields: [categoryId], references: [id])
   price          Int?
 }
-
-
