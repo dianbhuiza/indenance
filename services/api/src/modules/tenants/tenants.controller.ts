@@ -20,7 +20,9 @@ export class TenantsController {
   constructor(private readonly tenantsService: TenantsService) {}
 
   @Get('me')
-  async findMyTenant(@Request() request: AuthenticatedRequest): Promise<Tenant> {
+  async findMyTenant(
+    @Request() request: AuthenticatedRequest,
+  ): Promise<Tenant> {
     const tenant = await this.tenantsService.findByUserId(request.user.userId);
     if (!tenant) throw new NotFoundException('User has no tenant');
     return tenant;

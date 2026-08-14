@@ -1,18 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { BcryptService } from '../services/bcrypt.service';
 import {
-  AuthStrategy,
-  CredentialsInput,
   CreateAuthMethodInput,
+  CredentialStrategy,
   ValidatedAuthResult,
 } from './auth-strategy.interface';
 
 export const CREDENTIALS_PROVIDER = 'credentials';
 
 @Injectable()
-export class CredentialsStrategy implements AuthStrategy {
+export class CredentialsStrategy implements CredentialStrategy {
   readonly provider = CREDENTIALS_PROVIDER;
+  readonly flow = 'credentials' as const;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -20,7 +20,7 @@ export class CredentialsStrategy implements AuthStrategy {
   ) {}
 
   async create(input: CreateAuthMethodInput) {
-    const password = await this.bcrypt.hash(input.password);
+    const password = await this.bcrypt.hash(input.password ?? '');
 
     return this.prisma.authMethod.create({
       data: {
@@ -33,16 +33,11 @@ export class CredentialsStrategy implements AuthStrategy {
     });
   }
 
-  async validate(input: CredentialsInput): Promise<ValidatedAuthResult | null> {
-    const method = await this.prisma.authMethod.findUnique({
-      where: {
-        provider_providerAccountId: {
-          provider: this.provider,
-          providerAccountId: input.email,
-        },
-      },
-    });
-
+  async authenticate(input: {
+    email: string;
+    password: string;
+  }): Promise<ValidatedAuthResult | null> {
+    const method = await this.findMethod(input.email);
     if (!method?.password) return null;
 
     const matches = await this.bcrypt.compare(input.password, method.password);
@@ -54,5 +49,28 @@ export class CredentialsStrategy implements AuthStrategy {
       provider: method.provider,
       providerAccountId: method.providerAccountId,
     };
+  }
+
+  async findMethod(providerAccountId: string) {
+    return this.prisma.authMethod.findUnique({
+      where: {
+        provider_providerAccountId: {
+          provider: this.provider,
+          providerAccountId,
+        },
+      },
+    });
+  }
+
+  async resetPassword(userId: string, newPassword: string): Promise<void> {
+    const password = await this.bcrypt.hash(newPassword);
+
+    const { count } = await this.prisma.authMethod.updateMany({
+      where: { userId, provider: this.provider },
+      data: { password },
+    });
+
+    if (count === 0)
+      throw new NotFoundException('No credentials method found for this user');
   }
 }

@@ -40,3 +40,11 @@ export class RegisterDto {
   @MaxLength(30)
   phone?: string;
 }
+
+export class VerifyEmailDto {
+  @ApiProperty({
+    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+  })
+  @IsString()
+  token!: string;
+}

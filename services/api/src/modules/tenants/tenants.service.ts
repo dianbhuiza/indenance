@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Tenant } from '../../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTenantDto } from './dto/create-tenant.dto';
@@ -34,11 +38,15 @@ export class TenantsService {
     return user?.tenant ?? null;
   }
 
-  async update(tenantId: string, updateTenantDto: UpdateTenantDto): Promise<Tenant> {
+  async update(
+    tenantId: string,
+    updateTenantDto: UpdateTenantDto,
+  ): Promise<Tenant> {
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: tenantId },
     });
-    if (!tenant) throw new NotFoundException(`Tenant with id ${tenantId} not found`);
+    if (!tenant)
+      throw new NotFoundException(`Tenant with id ${tenantId} not found`);
     return this.prisma.tenant.update({
       where: { id: tenantId },
       data: updateTenantDto,

@@ -10,3 +10,4 @@ export class PrismaClient {}
 
 export type User = Record<string, any>;
 export type AuthMethod = Record<string, any>;
+export type RefreshToken = Record<string, any>;

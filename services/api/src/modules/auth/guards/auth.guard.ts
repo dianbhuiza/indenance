@@ -1,75 +1,50 @@
 import {
   CanActivate,
   ExecutionContext,
-  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import {
-  AUTH_STRATEGIES,
-  AuthStrategy,
-} from '../strategies/auth-strategy.interface';
-import { CREDENTIALS_PROVIDER } from '../strategies/credentials.strategy';
-
-const DEFAULT_PROVIDER = CREDENTIALS_PROVIDER;
 
 export interface AuthenticatedRequest extends Request {
-  user: { userId: string; provider: string };
+  user: { userId: string; provider: string; tenantId: string | null };
+}
+
+export interface JwtPayload {
+  sub: string;
+  provider: string;
+  tenantId?: string | null;
 }
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(
-    @Inject(AUTH_STRATEGIES) private readonly strategies: AuthStrategy[],
-  ) {}
+  constructor(private readonly jwtService: JwtService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
 
-    const provider = this.resolveProvider(request);
-    const strategy = this.strategies.find((s) => s.provider === provider);
-    if (!strategy)
-      throw new UnauthorizedException(`Unsupported auth provider: ${provider}`);
+    const token = this.resolveToken(request);
+    if (!token) throw new UnauthorizedException('Missing auth token');
 
-    const input = this.resolveCredentials(request);
-    if (!input) throw new UnauthorizedException('Missing credentials');
-
-    const result = await strategy.validate(input);
-    if (!result) throw new UnauthorizedException('Invalid credentials');
+    let payload: JwtPayload;
+    try {
+      payload = await this.jwtService.verifyAsync<JwtPayload>(token);
+    } catch {
+      throw new UnauthorizedException('Invalid auth token');
+    }
 
     request.user = {
-      userId: result.userId,
-      provider: result.provider,
+      userId: payload.sub,
+      provider: payload.provider,
+      tenantId: payload.tenantId ?? null,
     };
     return true;
   }
 
-  private resolveProvider(request: Request): string {
-    const header = request.headers['x-auth-provider'];
-    if (Array.isArray(header)) return header[0] || DEFAULT_PROVIDER;
-    return header || DEFAULT_PROVIDER;
-  }
-
-  private resolveCredentials(
-    request: Request,
-  ): { email: string; password: string } | null {
-    const authorization = request.headers.authorization;
-    if (!authorization || !authorization.startsWith('Basic ')) return null;
-
-    try {
-      const decoded = Buffer.from(
-        authorization.slice('Basic '.length),
-        'base64',
-      ).toString('utf8');
-      const separator = decoded.indexOf(':');
-      if (separator === -1) return null;
-      return {
-        email: decoded.slice(0, separator),
-        password: decoded.slice(separator + 1),
-      };
-    } catch {
-      return null;
-    }
+  private resolveToken(request: Request): string | null {
+    const header = request.headers.authorization;
+    if (!header || !header.startsWith('Bearer ')) return null;
+    return header.slice('Bearer '.length);
   }
 }
