@@ -1,40 +1,81 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
+import { Account } from '../../../generated/prisma/client';
+import type { AuthenticatedRequest } from '../auth/guards/auth.guard';
+import { AuthGuard } from '../auth/guards/auth.guard';
 import { AccountsService } from './accounts.service';
+import { CreateAccountDto } from './dto/create-account.dto';
+import { UpdateAccountDto } from './dto/update-account.dto';
 
 @Controller('accounts')
+@UseGuards(AuthGuard)
 export class AccountsController {
   constructor(private readonly accountsService: AccountsService) {}
 
   @Post()
-  create() {
-    return this.accountsService.create();
+  create(
+    @Request() request: AuthenticatedRequest,
+    @Body() dto: CreateAccountDto,
+  ): Promise<Account> {
+    return this.accountsService.create(
+      request.user.userId,
+      request.user.tenantId,
+      dto,
+    );
   }
 
   @Get()
-  findAll() {
-    return this.accountsService.findAll();
+  findAll(@Request() request: AuthenticatedRequest): Promise<Account[]> {
+    return this.accountsService.findAll(
+      request.user.userId,
+      request.user.tenantId,
+    );
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.accountsService.findOne(+id);
+  findOne(
+    @Request() request: AuthenticatedRequest,
+    @Param('id') id: string,
+  ): Promise<Account> {
+    return this.accountsService.findOne(
+      request.user.userId,
+      request.user.tenantId,
+      id,
+    );
   }
 
   @Patch(':id')
-  update(@Param('id') id: string) {
-    return this.accountsService.update(+id);
+  update(
+    @Request() request: AuthenticatedRequest,
+    @Param('id') id: string,
+    @Body() dto: UpdateAccountDto,
+  ): Promise<Account> {
+    return this.accountsService.update(
+      request.user.userId,
+      request.user.tenantId,
+      id,
+      dto,
+    );
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.accountsService.remove(+id);
+  remove(
+    @Request() request: AuthenticatedRequest,
+    @Param('id') id: string,
+  ): Promise<Account> {
+    return this.accountsService.remove(
+      request.user.userId,
+      request.user.tenantId,
+      id,
+    );
   }
 }
