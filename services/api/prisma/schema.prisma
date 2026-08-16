@@ -60,6 +60,7 @@ model Tenant {
   transactions        Transaction[]
   budgets             Budget[]
   plannedTransactions PlannedTransaction[]
+  plannedTransactionAlerts PlannedTransactionAlert[]
   shoppingLists       ShoppingList[]
   accounts            Account[]
 }
@@ -75,6 +76,7 @@ model Account {
   balance             Int                  @default(0)
   transactions        Transaction[]
   plannedTransactions PlannedTransaction[]
+  plannedTransactionAlerts PlannedTransactionAlert[]
 
   @@index([userId, tenantId])
 }
@@ -90,6 +92,7 @@ model Transaction {
   categoryId String?
   Tenant     Tenant          @relation(fields: [tenantId], references: [id])
   tenantId   String
+  plannedTransactionAlert PlannedTransactionAlert?
 }
 
 enum TransactionType {
@@ -105,6 +108,7 @@ model Category {
   transactions        Transaction[]
   budgets             Budget[]
   plannedTransactions PlannedTransaction[]
+  plannedTransactionAlerts PlannedTransactionAlert[]
   shoppingListItems   ShoppingListItem[]
 }
 
@@ -122,18 +126,21 @@ model Budget {
 }
 
 model PlannedTransaction {
-  id          String          @id @default(uuid())
+  id          String                @id @default(uuid())
   accountId   String
-  account     Account         @relation(fields: [accountId], references: [id])
+  account     Account               @relation(fields: [accountId], references: [id])
   amount      Int
-  isRecurring Boolean         @default(false)
+  isRecurring Boolean               @default(false)
   interval    Interval?
   type        TransactionType
   scheduledAt DateTime
-  category    Category?       @relation(fields: [categoryId], references: [id])
+  category    Category?             @relation(fields: [categoryId], references: [id])
   categoryId  String?
-  Tenant      Tenant          @relation(fields: [tenantId], references: [id])
+  Tenant      Tenant                @relation(fields: [tenantId], references: [id])
   tenantId    String
+  deletedAt   DateTime?
+  status      PlannedTransactionStatus @default(ACTIVE)
+  alerts      PlannedTransactionAlert[]
 }
 
 enum Interval {
@@ -141,6 +148,40 @@ enum Interval {
   WEEKLY
   MONTHLY
   YEARLY
+}
+
+enum PlannedTransactionStatus {
+  ACTIVE
+  COMPLETED
+}
+
+enum PlannedTransactionAlertStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model PlannedTransactionAlert {
+  id                   String                     @id @default(uuid())
+  plannedTransactionId String
+  plannedTransaction   PlannedTransaction         @relation(fields: [plannedTransactionId], references: [id], onDelete: Cascade)
+  tenantId             String
+  tenant               Tenant                     @relation(fields: [tenantId], references: [id])
+  accountId            String
+  account              Account                    @relation(fields: [accountId], references: [id])
+  amount               Int
+  type                 TransactionType
+  categoryId           String?
+  category             Category?                  @relation(fields: [categoryId], references: [id])
+  dueAt                DateTime
+  status               PlannedTransactionAlertStatus @default(PENDING)
+  transactionId        String?                    @unique
+  transaction          Transaction?               @relation(fields: [transactionId], references: [id], onDelete: SetNull)
+  createdAt            DateTime                   @default(now())
+  resolvedAt           DateTime?
+
+  @@index([status, dueAt])
+  @@index([plannedTransactionId])
 }
 
 model ShoppingList {

@@ -55,4 +55,8 @@ export class AppConfig {
       'Indenance <onboarding@resend.dev>'
     );
   }
+
+  get plannedTxCron(): string {
+    return this.config.get<string>('PLANNED_TX_CRON') ?? '0 * * * *';
+  }
 }

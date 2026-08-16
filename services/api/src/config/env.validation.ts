@@ -47,6 +47,10 @@ class EnvironmentVariables {
   EMAIL_FROM?: string;
 
   @IsOptional()
+  @IsString()
+  PLANNED_TX_CRON?: string;
+
+  @IsOptional()
   @IsNumber()
   PORT?: number;
 }
