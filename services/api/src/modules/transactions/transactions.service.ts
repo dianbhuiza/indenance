@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import type { Prisma, Transaction } from '../../../generated/prisma/client';
+import { BudgetsService } from '../budgets/budgets.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TransactionContextService } from '../shared/transaction-context/transaction-context.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
@@ -13,6 +14,7 @@ export class TransactionsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly txContext: TransactionContextService,
+    private readonly budgetsService: BudgetsService,
   ) {}
 
   private assertTenant(tenantId: string | null): asserts tenantId is string {
@@ -64,6 +66,15 @@ export class TransactionsService {
         },
       },
     });
+
+    if (dto.type === 'EXPENSE') {
+      await this.budgetsService.applyExpense(
+        tx,
+        tenantId,
+        dto.categoryId ?? null,
+        dto.amount,
+      );
+    }
 
     return transaction;
   }

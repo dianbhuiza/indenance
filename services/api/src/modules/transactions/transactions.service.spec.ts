@@ -1,5 +1,6 @@
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { BudgetsService } from '../budgets/budgets.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TransactionContextService } from '../shared/transaction-context/transaction-context.service';
 import { TransactionsService } from './transactions.service';
@@ -27,6 +28,10 @@ describe('TransactionsService', () => {
     },
   };
 
+  const budgetsServiceMock = {
+    applyExpense: jest.fn(),
+  };
+
   const accountMock = {
     id: 'account-1',
     userId: 'user-1',
@@ -42,6 +47,7 @@ describe('TransactionsService', () => {
         TransactionsService,
         TransactionContextService,
         { provide: PrismaService, useValue: prismaMock },
+        { provide: BudgetsService, useValue: budgetsServiceMock },
       ],
     }).compile();
 
@@ -112,6 +118,51 @@ describe('TransactionsService', () => {
         where: { id: 'account-1' },
         data: { balance: { increment: -200 } },
       });
+    });
+
+    it('applies budget usage for an expense', async () => {
+      txMock.account.findFirst.mockResolvedValue(accountMock);
+      txMock.transaction.create.mockResolvedValue({
+        id: 'tx-2',
+        accountId: 'account-1',
+        tenantId: 'tenant-1',
+        amount: 200,
+        type: 'EXPENSE',
+      });
+      budgetsServiceMock.applyExpense.mockResolvedValue(undefined);
+
+      await service.record('user-1', 'tenant-1', {
+        accountId: 'account-1',
+        amount: 200,
+        type: 'EXPENSE',
+        categoryId: 'cat-1',
+      });
+
+      expect(budgetsServiceMock.applyExpense).toHaveBeenCalledWith(
+        txMock,
+        'tenant-1',
+        'cat-1',
+        200,
+      );
+    });
+
+    it('does not apply budget usage for an income', async () => {
+      txMock.account.findFirst.mockResolvedValue(accountMock);
+      txMock.transaction.create.mockResolvedValue({
+        id: 'tx-1',
+        accountId: 'account-1',
+        tenantId: 'tenant-1',
+        amount: 500,
+        type: 'INCOME',
+      });
+
+      await service.record('user-1', 'tenant-1', {
+        accountId: 'account-1',
+        amount: 500,
+        type: 'INCOME',
+      });
+
+      expect(budgetsServiceMock.applyExpense).not.toHaveBeenCalled();
     });
 
     it('throws NotFoundException when the account is not owned by the user', async () => {

@@ -45,3 +45,5 @@ export type PlannedTransaction = Record<string, any>;
 export type PlannedTransactionAlert = Record<string, any>;
 export type ShoppingList = Record<string, any>;
 export type ShoppingListItem = Record<string, any>;
+export type Budget = Record<string, any>;
+export type Prisma = Record<string, any>;

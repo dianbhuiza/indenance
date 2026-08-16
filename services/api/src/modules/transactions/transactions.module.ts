@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
+import { BudgetsModule } from '../budgets/budgets.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { TransactionRequestedHandler } from './handlers/transaction-requested.handler';
 import { TransactionsController } from './transactions.controller';
 import { TransactionsService } from './transactions.service';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, BudgetsModule],
   controllers: [TransactionsController],
   providers: [TransactionsService, TransactionRequestedHandler],
 })

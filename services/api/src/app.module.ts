@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AppConfigModule } from './config/app-config.module';
 import { AccountsModule } from './modules/accounts/accounts.module';
+import { BudgetsModule } from './modules/budgets/budgets.module';
 import { MailModule } from './modules/mail/mail.module';
 import { PlannedTransactionsModule } from './modules/planned-transactions/planned-transactions.module';
 import { PrismaModule } from './modules/prisma/prisma.module';
@@ -21,6 +22,7 @@ import { UsersModule } from './modules/users/users.module';
     EventEmitterModule.forRoot(),
     ScheduleModule.forRoot(),
     AccountsModule,
+    BudgetsModule,
     MailModule,
     PlannedTransactionsModule,
     PrismaModule,

@@ -117,12 +117,16 @@ model Budget {
   name        String
   amount      Int
   startDate   DateTime
+  endDate     DateTime?
   isRecurring Boolean   @default(false)
   interval    Interval?
+  exceededAt  DateTime?
   tenantId    String
   tenant      Tenant    @relation(fields: [tenantId], references: [id])
-  category    Category  @relation(fields: [categoryId], references: [id])
-  categoryId  String
+  category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  categoryId  String?
+
+  @@index([tenantId])
 }
 
 model PlannedTransaction {
