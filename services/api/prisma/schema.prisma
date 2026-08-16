@@ -185,21 +185,27 @@ model PlannedTransactionAlert {
 }
 
 model ShoppingList {
-  id       String             @id @default(uuid())
-  name     String
-  items    ShoppingListItem[]
-  tenantId String
-  tenant   Tenant             @relation(fields: [tenantId], references: [id])
+  id          String             @id @default(uuid())
+  name        String
+  items       ShoppingListItem[]
+  tenantId    String
+  tenant      Tenant             @relation(fields: [tenantId], references: [id])
+  deletedAt   DateTime?
+  purchasedAt DateTime?
+
+  @@index([tenantId])
 }
 
 model ShoppingListItem {
   id             String       @id @default(uuid())
   name           String
-  quantity       Int
+  quantity       Int          @default(1)
   isPurchased    Boolean      @default(false)
   shoppingListId String
   shoppingList   ShoppingList @relation(fields: [shoppingListId], references: [id])
   categoryId     String?
   category       Category?    @relation(fields: [categoryId], references: [id])
   price          Int?
+
+  @@index([shoppingListId])
 }

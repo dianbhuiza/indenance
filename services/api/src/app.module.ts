@@ -9,6 +9,7 @@ import { MailModule } from './modules/mail/mail.module';
 import { PlannedTransactionsModule } from './modules/planned-transactions/planned-transactions.module';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { ShoppingListsModule } from './modules/shopping-lists/shopping-lists.module';
 import { TransactionContextModule } from './modules/shared/transaction-context/transaction-context.module';
 import { TenantsModule } from './modules/tenants/tenants.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
@@ -24,6 +25,7 @@ import { UsersModule } from './modules/users/users.module';
     PlannedTransactionsModule,
     PrismaModule,
     AuthModule,
+    ShoppingListsModule,
     TransactionContextModule,
     TenantsModule,
     TransactionsModule,

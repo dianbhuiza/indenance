@@ -43,3 +43,5 @@ export type AuthMethod = Record<string, any>;
 export type RefreshToken = Record<string, any>;
 export type PlannedTransaction = Record<string, any>;
 export type PlannedTransactionAlert = Record<string, any>;
+export type ShoppingList = Record<string, any>;
+export type ShoppingListItem = Record<string, any>;
