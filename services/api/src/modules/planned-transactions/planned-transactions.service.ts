@@ -1,13 +1,14 @@
 import {
   BadRequestException,
-  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import type {
   Prisma,
   PlannedTransaction,
-} from '../../../generated/prisma/client';
+  PlannedTransactionStatus,
+} from '../../generated/prisma/client';
+import { assertTenant } from '../shared/assert-tenant';
 import { PrismaService } from '../prisma/prisma.service';
 import { TransactionContextService } from '../shared/transaction-context/transaction-context.service';
 import { CreatePlannedTransactionDto } from './dto/create-planned-transaction.dto';
@@ -19,11 +20,6 @@ export class PlannedTransactionsService {
     private readonly prisma: PrismaService,
     private readonly txContext: TransactionContextService,
   ) {}
-
-  private assertTenant(tenantId: string | null): asserts tenantId is string {
-    if (!tenantId)
-      throw new ForbiddenException('User does not belong to a tenant');
-  }
 
   private assertRecurring(dto: CreatePlannedTransactionDto): void {
     if (dto.isRecurring && !dto.interval)
@@ -37,7 +33,7 @@ export class PlannedTransactionsService {
     tenantId: string | null,
     dto: CreatePlannedTransactionDto,
   ): Promise<PlannedTransaction> {
-    this.assertTenant(tenantId);
+    assertTenant(tenantId);
     this.assertRecurring(dto);
     if (this.txContext.isActive()) {
       return this.createWith(this.txContext.client(), userId, tenantId, dto);
@@ -75,6 +71,7 @@ export class PlannedTransactionsService {
     tenantId: string | null,
     status?: string,
   ): Promise<PlannedTransaction[]> {
+    assertTenant(tenantId);
     const validStatuses = ['ACTIVE', 'COMPLETED'];
     if (status && !validStatuses.includes(status)) {
       throw new BadRequestException(
@@ -83,9 +80,9 @@ export class PlannedTransactionsService {
     }
     return this.prisma.plannedTransaction.findMany({
       where: {
-        tenantId: tenantId ?? undefined,
+        tenantId,
         deletedAt: null,
-        status: (status as never) ?? undefined,
+        status: status && validStatuses.includes(status) ? (status as PlannedTransactionStatus) : undefined,
         account: { userId },
       },
       include: { account: true, category: true },
@@ -98,10 +95,11 @@ export class PlannedTransactionsService {
     tenantId: string | null,
     id: string,
   ): Promise<PlannedTransaction> {
+    assertTenant(tenantId);
     const plannedTransaction = await this.prisma.plannedTransaction.findFirst({
       where: {
         id,
-        tenantId: tenantId ?? undefined,
+        tenantId,
         deletedAt: null,
         status: 'ACTIVE',
         account: { userId },
@@ -118,7 +116,7 @@ export class PlannedTransactionsService {
     id: string,
     dto: UpdatePlannedTransactionDto,
   ): Promise<PlannedTransaction> {
-    this.assertTenant(tenantId);
+    assertTenant(tenantId);
     const existing = await this.findOne(userId, tenantId, id);
     if (dto.isRecurring === true && !dto.interval)
       throw new BadRequestException(
@@ -177,6 +175,7 @@ export class PlannedTransactionsService {
     tenantId: string | null,
     id: string,
   ): Promise<PlannedTransaction> {
+    assertTenant(tenantId);
     await this.findOne(userId, tenantId, id);
     if (this.txContext.isActive()) {
       return this.softDeleteWith(this.txContext.client(), id);
@@ -203,6 +202,7 @@ export class PlannedTransactionsService {
     tenantId: string | null,
     id: string,
   ): Promise<PlannedTransaction> {
+    assertTenant(tenantId);
     await this.findOne(userId, tenantId, id);
     return this.prisma.plannedTransaction.delete({ where: { id } });
   }

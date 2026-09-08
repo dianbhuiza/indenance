@@ -57,39 +57,42 @@ export class RefreshTokensService {
 
   async rotate(refreshToken: string): Promise<RotatedToken> {
     const tokenHash = this.hash(refreshToken);
-    const stored = await this.prisma.refreshToken.findUnique({
-      where: { tokenHash },
-    });
-
-    if (
-      !stored ||
-      stored.revokedAt ||
-      stored.expiresAt.getTime() < Date.now()
-    ) {
-      throw new UnauthorizedException('Invalid or expired refresh token');
-    }
-
     const newToken = this.issueToken();
     const newHash = this.hash(newToken);
 
-    await this.prisma.$transaction([
-      this.prisma.refreshToken.update({
+    const result = await this.prisma.$transaction(async (tx) => {
+      const stored = await tx.refreshToken.findUnique({
+        where: { tokenHash },
+      });
+
+      if (
+        !stored ||
+        stored.revokedAt ||
+        stored.expiresAt.getTime() < Date.now()
+      ) {
+        throw new UnauthorizedException('Invalid or expired refresh token');
+      }
+
+      await tx.refreshToken.update({
         where: { id: stored.id },
         data: { revokedAt: new Date(), replacedByTokenHash: newHash },
-      }),
-      this.prisma.refreshToken.create({
+      });
+
+      await tx.refreshToken.create({
         data: {
           userId: stored.userId,
           provider: stored.provider,
           tokenHash: newHash,
           expiresAt: this.toExpiry(),
         },
-      }),
-    ]);
+      });
+
+      return stored;
+    });
 
     return {
-      userId: stored.userId,
-      provider: stored.provider,
+      userId: result.userId,
+      provider: result.provider,
       token: newToken,
     };
   }
@@ -98,6 +101,13 @@ export class RefreshTokensService {
     const tokenHash = this.hash(refreshToken);
     await this.prisma.refreshToken.updateMany({
       where: { tokenHash, revokedAt: null },
+      data: { revokedAt: new Date() },
+    });
+  }
+
+  async revokeAllForUser(userId: string): Promise<void> {
+    await this.prisma.refreshToken.updateMany({
+      where: { userId, revokedAt: null },
       data: { revokedAt: new Date() },
     });
   }

@@ -4,21 +4,19 @@ import {
   Delete,
   Get,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   Query,
   Request,
-  UseGuards,
 } from '@nestjs/common';
-import { PlannedTransaction } from '../../../generated/prisma/client';
+import { PlannedTransaction } from '../../generated/prisma/client';
 import type { AuthenticatedRequest } from '../auth/guards/auth.guard';
-import { AuthGuard } from '../auth/guards/auth.guard';
 import { CreatePlannedTransactionDto } from './dto/create-planned-transaction.dto';
 import { UpdatePlannedTransactionDto } from './dto/update-planned-transaction.dto';
 import { PlannedTransactionsService } from './planned-transactions.service';
 
 @Controller('planned-transactions')
-@UseGuards(AuthGuard)
 export class PlannedTransactionsController {
   constructor(
     private readonly plannedTransactionsService: PlannedTransactionsService,
@@ -51,7 +49,7 @@ export class PlannedTransactionsController {
   @Get(':id')
   findOne(
     @Request() request: AuthenticatedRequest,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ): Promise<PlannedTransaction> {
     return this.plannedTransactionsService.findOne(
       request.user.userId,
@@ -63,7 +61,7 @@ export class PlannedTransactionsController {
   @Patch(':id')
   update(
     @Request() request: AuthenticatedRequest,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdatePlannedTransactionDto,
   ): Promise<PlannedTransaction> {
     return this.plannedTransactionsService.update(
@@ -77,7 +75,7 @@ export class PlannedTransactionsController {
   @Delete(':id')
   softDelete(
     @Request() request: AuthenticatedRequest,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ): Promise<PlannedTransaction> {
     return this.plannedTransactionsService.softDelete(
       request.user.userId,
@@ -89,7 +87,7 @@ export class PlannedTransactionsController {
   @Delete(':id/remove')
   remove(
     @Request() request: AuthenticatedRequest,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ): Promise<PlannedTransaction> {
     return this.plannedTransactionsService.remove(
       request.user.userId,

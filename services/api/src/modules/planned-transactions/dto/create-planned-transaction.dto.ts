@@ -9,7 +9,7 @@ import {
   IsString,
   Min,
 } from 'class-validator';
-import { Interval, TransactionType } from '../../../../generated/prisma/client';
+import { Interval, TransactionType } from '../../../generated/prisma/client';
 
 export class CreatePlannedTransactionDto {
   @ApiProperty({ example: '0d2b3b28-0a3a-4f6b-9b9e-4b6d0f1a2b3c' })

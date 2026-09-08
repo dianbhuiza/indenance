@@ -1,9 +1,9 @@
 import {
-  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Account } from '../../../generated/prisma/client';
+import { Account } from '../../generated/prisma/client';
+import { assertTenant } from '../shared/assert-tenant';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
@@ -12,17 +12,12 @@ import { UpdateAccountDto } from './dto/update-account.dto';
 export class AccountsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private assertTenant(tenantId: string | null): asserts tenantId is string {
-    if (!tenantId)
-      throw new ForbiddenException('User does not belong to a tenant');
-  }
-
   async create(
     userId: string,
     tenantId: string | null,
     dto: CreateAccountDto,
   ): Promise<Account> {
-    this.assertTenant(tenantId);
+    assertTenant(tenantId);
     return this.prisma.account.create({
       data: {
         userId,
@@ -35,8 +30,9 @@ export class AccountsService {
   }
 
   async findAll(userId: string, tenantId: string | null): Promise<Account[]> {
+    assertTenant(tenantId);
     return this.prisma.account.findMany({
-      where: { userId, tenantId: tenantId ?? undefined },
+      where: { userId, tenantId },
       orderBy: { name: 'asc' },
     });
   }
@@ -46,8 +42,9 @@ export class AccountsService {
     tenantId: string | null,
     id: string,
   ): Promise<Account> {
+    assertTenant(tenantId);
     const account = await this.prisma.account.findFirst({
-      where: { id, userId, tenantId: tenantId ?? undefined },
+      where: { id, userId, tenantId },
     });
     if (!account)
       throw new NotFoundException(`Account with id ${id} not found`);

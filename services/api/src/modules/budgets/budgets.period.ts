@@ -1,4 +1,4 @@
-import type { Interval } from '../../../generated/prisma/client';
+import type { Interval } from '../../generated/prisma/client';
 
 export interface BudgetPeriod {
   start: Date;

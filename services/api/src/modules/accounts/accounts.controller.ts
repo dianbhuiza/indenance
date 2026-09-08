@@ -4,20 +4,18 @@ import {
   Delete,
   Get,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   Request,
-  UseGuards,
 } from '@nestjs/common';
-import { Account } from '../../../generated/prisma/client';
+import { Account } from '../../generated/prisma/client';
 import type { AuthenticatedRequest } from '../auth/guards/auth.guard';
-import { AuthGuard } from '../auth/guards/auth.guard';
 import { AccountsService } from './accounts.service';
 import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
 
 @Controller('accounts')
-@UseGuards(AuthGuard)
 export class AccountsController {
   constructor(private readonly accountsService: AccountsService) {}
 
@@ -44,7 +42,7 @@ export class AccountsController {
   @Get(':id')
   findOne(
     @Request() request: AuthenticatedRequest,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ): Promise<Account> {
     return this.accountsService.findOne(
       request.user.userId,
@@ -56,7 +54,7 @@ export class AccountsController {
   @Patch(':id')
   update(
     @Request() request: AuthenticatedRequest,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateAccountDto,
   ): Promise<Account> {
     return this.accountsService.update(
@@ -70,7 +68,7 @@ export class AccountsController {
   @Delete(':id')
   remove(
     @Request() request: AuthenticatedRequest,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ): Promise<Account> {
     return this.accountsService.remove(
       request.user.userId,

@@ -4,18 +4,17 @@ import {
   Delete,
   Get,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   Query,
   Request,
-  UseGuards,
 } from '@nestjs/common';
 import type {
   ShoppingList,
   ShoppingListItem,
-} from '../../../generated/prisma/client';
+} from '../../generated/prisma/client';
 import type { AuthenticatedRequest } from '../auth/guards/auth.guard';
-import { AuthGuard } from '../auth/guards/auth.guard';
 import { CreateShoppingListItemDto } from './dto/create-shopping-list-item.dto';
 import { CreateShoppingListDto } from './dto/create-shopping-list.dto';
 import { PurchaseShoppingListDto } from './dto/purchase-shopping-list.dto';
@@ -24,7 +23,6 @@ import { UpdateShoppingListDto } from './dto/update-shopping-list.dto';
 import { ShoppingListsService } from './shopping-lists.service';
 
 @Controller('shopping-lists')
-@UseGuards(AuthGuard)
 export class ShoppingListsController {
   constructor(private readonly shoppingListsService: ShoppingListsService) {}
 
@@ -51,7 +49,7 @@ export class ShoppingListsController {
   @Get(':id')
   findOne(
     @Request() request: AuthenticatedRequest,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ): Promise<ShoppingList & { items: ShoppingListItem[] }> {
     return this.shoppingListsService.findOne(request.user.tenantId, id);
   }
@@ -59,7 +57,7 @@ export class ShoppingListsController {
   @Patch(':id')
   update(
     @Request() request: AuthenticatedRequest,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateShoppingListDto,
   ): Promise<ShoppingList> {
     return this.shoppingListsService.update(request.user.tenantId, id, dto);
@@ -68,7 +66,7 @@ export class ShoppingListsController {
   @Delete(':id')
   softDelete(
     @Request() request: AuthenticatedRequest,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ): Promise<ShoppingList> {
     return this.shoppingListsService.softDelete(request.user.tenantId, id);
   }
@@ -76,7 +74,7 @@ export class ShoppingListsController {
   @Delete(':id/remove')
   remove(
     @Request() request: AuthenticatedRequest,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ): Promise<ShoppingList> {
     return this.shoppingListsService.remove(request.user.tenantId, id);
   }
@@ -84,7 +82,7 @@ export class ShoppingListsController {
   @Post(':id/items')
   addItem(
     @Request() request: AuthenticatedRequest,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: CreateShoppingListItemDto,
   ): Promise<ShoppingListItem> {
     return this.shoppingListsService.addItem(request.user.tenantId, id, dto);
@@ -93,8 +91,8 @@ export class ShoppingListsController {
   @Patch(':id/items/:itemId')
   updateItem(
     @Request() request: AuthenticatedRequest,
-    @Param('id') id: string,
-    @Param('itemId') itemId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('itemId', ParseUUIDPipe) itemId: string,
     @Body() dto: UpdateShoppingListItemDto,
   ): Promise<ShoppingListItem> {
     return this.shoppingListsService.updateItem(
@@ -108,8 +106,8 @@ export class ShoppingListsController {
   @Delete(':id/items/:itemId')
   removeItem(
     @Request() request: AuthenticatedRequest,
-    @Param('id') id: string,
-    @Param('itemId') itemId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('itemId', ParseUUIDPipe) itemId: string,
   ): Promise<ShoppingListItem> {
     return this.shoppingListsService.removeItem(
       request.user.tenantId,
@@ -121,7 +119,7 @@ export class ShoppingListsController {
   @Post(':id/purchase')
   purchase(
     @Request() request: AuthenticatedRequest,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: PurchaseShoppingListDto,
   ): Promise<ShoppingList & { items: ShoppingListItem[] }> {
     return this.shoppingListsService.purchase(

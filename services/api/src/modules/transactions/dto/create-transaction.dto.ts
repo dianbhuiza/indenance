@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
-import { TransactionType } from '../../../../generated/prisma/client';
+import { TransactionType } from '../../../generated/prisma/client';
 
 export class CreateTransactionDto {
   @ApiProperty({ example: '0d2b3b28-0a3a-4f6b-9b9e-4b6d0f1a2b3c' })

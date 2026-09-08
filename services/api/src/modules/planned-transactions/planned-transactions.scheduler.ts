@@ -1,7 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { CronJob } from 'cron';
-import { PlannedTransaction } from '../../../generated/prisma/client';
+import { PlannedTransaction } from '../../generated/prisma/client';
 import { AppConfig } from '../../config/app.config';
 import { PrismaService } from '../prisma/prisma.service';
 import { TransactionContextService } from '../shared/transaction-context/transaction-context.service';

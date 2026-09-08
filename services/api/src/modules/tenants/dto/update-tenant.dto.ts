@@ -1,11 +1,4 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { PartialType } from '@nestjs/swagger';
+import { CreateTenantDto } from './create-tenant.dto';
 
-export class UpdateTenantDto {
-  @ApiPropertyOptional({ example: 'Mi hogar' })
-  @IsOptional()
-  @IsString()
-  @MinLength(1)
-  @MaxLength(120)
-  name?: string;
-}
+export class UpdateTenantDto extends PartialType(CreateTenantDto) {}

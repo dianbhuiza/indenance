@@ -2,18 +2,16 @@ import {
   Controller,
   Get,
   Param,
+  ParseUUIDPipe,
   Post,
   Query,
   Request,
-  UseGuards,
 } from '@nestjs/common';
-import { PlannedTransactionAlert } from '../../../generated/prisma/client';
+import { PlannedTransactionAlert } from '../../generated/prisma/client';
 import type { AuthenticatedRequest } from '../auth/guards/auth.guard';
-import { AuthGuard } from '../auth/guards/auth.guard';
 import { PlannedTransactionAlertsService } from './planned-transaction-alerts.service';
 
 @Controller('planned-transactions/alerts')
-@UseGuards(AuthGuard)
 export class PlannedTransactionAlertsController {
   constructor(
     private readonly alertsService: PlannedTransactionAlertsService,
@@ -34,7 +32,7 @@ export class PlannedTransactionAlertsController {
   @Post(':id/approve')
   approve(
     @Request() request: AuthenticatedRequest,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ): Promise<PlannedTransactionAlert> {
     return this.alertsService.approve(
       request.user.userId,
@@ -46,7 +44,7 @@ export class PlannedTransactionAlertsController {
   @Post(':id/reject')
   reject(
     @Request() request: AuthenticatedRequest,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ): Promise<PlannedTransactionAlert> {
     return this.alertsService.reject(
       request.user.userId,

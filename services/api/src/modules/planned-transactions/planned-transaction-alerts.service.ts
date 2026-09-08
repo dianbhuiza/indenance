@@ -1,14 +1,15 @@
 import {
   BadRequestException,
-  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import type {
   PlannedTransactionAlert,
+  PlannedTransactionAlertStatus,
   Transaction,
-} from '../../../generated/prisma/client';
+} from '../../generated/prisma/client';
+import { assertTenant } from '../shared/assert-tenant';
 import { PrismaService } from '../prisma/prisma.service';
 import { TransactionContextService } from '../shared/transaction-context/transaction-context.service';
 import {
@@ -24,16 +25,12 @@ export class PlannedTransactionAlertsService {
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  private assertTenant(tenantId: string | null): asserts tenantId is string {
-    if (!tenantId)
-      throw new ForbiddenException('User does not belong to a tenant');
-  }
-
   async findAll(
     userId: string,
     tenantId: string | null,
     status?: string,
   ): Promise<PlannedTransactionAlert[]> {
+    assertTenant(tenantId);
     const validStatuses = ['PENDING', 'APPROVED', 'REJECTED'];
     if (status && !validStatuses.includes(status)) {
       throw new BadRequestException(
@@ -42,8 +39,8 @@ export class PlannedTransactionAlertsService {
     }
     return this.prisma.plannedTransactionAlert.findMany({
       where: {
-        tenantId: tenantId ?? undefined,
-        status: (status as never) ?? undefined,
+        tenantId,
+        status: status && validStatuses.includes(status) ? (status as PlannedTransactionAlertStatus) : undefined,
         account: { userId },
       },
       include: {
@@ -61,7 +58,7 @@ export class PlannedTransactionAlertsService {
     tenantId: string | null,
     id: string,
   ): Promise<PlannedTransactionAlert> {
-    this.assertTenant(tenantId);
+    assertTenant(tenantId);
     const alert = await this.findOnePending(userId, tenantId, id);
 
     return this.txContext.run(async () => {
@@ -100,7 +97,7 @@ export class PlannedTransactionAlertsService {
     tenantId: string | null,
     id: string,
   ): Promise<PlannedTransactionAlert> {
-    this.assertTenant(tenantId);
+    assertTenant(tenantId);
     await this.findOnePending(userId, tenantId, id);
 
     return this.prisma.plannedTransactionAlert.update({
@@ -126,5 +123,3 @@ export class PlannedTransactionAlertsService {
     return alert;
   }
 }
-
-export type { Transaction };

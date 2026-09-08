@@ -1,21 +1,20 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   Get,
   NotFoundException,
   Param,
+  ParseUUIDPipe,
   Patch,
   Request,
-  UseGuards,
 } from '@nestjs/common';
-import { Tenant } from '../../../generated/prisma/client';
+import { Tenant } from '../../generated/prisma/client';
 import type { AuthenticatedRequest } from '../auth/guards/auth.guard';
-import { AuthGuard } from '../auth/guards/auth.guard';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
 import { TenantsService } from './tenants.service';
 
 @Controller('tenants')
-@UseGuards(AuthGuard)
 export class TenantsController {
   constructor(private readonly tenantsService: TenantsService) {}
 
@@ -30,9 +29,12 @@ export class TenantsController {
 
   @Patch(':id')
   async update(
-    @Param('id') id: string,
+    @Request() request: AuthenticatedRequest,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() updateTenantDto: UpdateTenantDto,
   ): Promise<Tenant> {
+    if (request.user.tenantId !== id)
+      throw new ForbiddenException('You can only update your own tenant');
     return this.tenantsService.update(id, updateTenantDto);
   }
 }

@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -9,7 +8,8 @@ import type {
   Prisma,
   ShoppingList,
   ShoppingListItem,
-} from '../../../generated/prisma/client';
+} from '../../generated/prisma/client';
+import { assertTenant } from '../shared/assert-tenant';
 import { PrismaService } from '../prisma/prisma.service';
 import { TransactionContextService } from '../shared/transaction-context/transaction-context.service';
 import {
@@ -30,17 +30,12 @@ export class ShoppingListsService {
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
-  private assertTenant(tenantId: string | null): asserts tenantId is string {
-    if (!tenantId)
-      throw new ForbiddenException('User does not belong to a tenant');
-  }
-
   async create(
     userId: string,
     tenantId: string | null,
     dto: CreateShoppingListDto,
   ): Promise<ShoppingList> {
-    this.assertTenant(tenantId);
+    assertTenant(tenantId);
     void userId;
     return this.prisma.shoppingList.create({
       data: { name: dto.name, tenantId },
@@ -52,12 +47,13 @@ export class ShoppingListsService {
     tenantId: string | null,
     status?: string,
   ): Promise<ShoppingList[]> {
+    assertTenant(tenantId);
     if (status && !['OPEN', 'PURCHASED'].includes(status)) {
       throw new BadRequestException('status must be one of OPEN, PURCHASED');
     }
     return this.prisma.shoppingList.findMany({
       where: {
-        tenantId: tenantId ?? undefined,
+        tenantId,
         deletedAt: null,
         purchasedAt:
           status === 'PURCHASED'
@@ -75,8 +71,9 @@ export class ShoppingListsService {
     tenantId: string | null,
     id: string,
   ): Promise<ShoppingList & { items: ShoppingListItem[] }> {
+    assertTenant(tenantId);
     const list = await this.prisma.shoppingList.findFirst({
-      where: { id, tenantId: tenantId ?? undefined, deletedAt: null },
+      where: { id, tenantId, deletedAt: null },
       include: { items: true },
     });
     if (!list)
@@ -89,6 +86,7 @@ export class ShoppingListsService {
     id: string,
     dto: UpdateShoppingListDto,
   ): Promise<ShoppingList> {
+    assertTenant(tenantId);
     await this.findOne(tenantId, id);
     return this.prisma.shoppingList.update({
       where: { id },
@@ -98,6 +96,7 @@ export class ShoppingListsService {
   }
 
   async softDelete(tenantId: string | null, id: string): Promise<ShoppingList> {
+    assertTenant(tenantId);
     await this.findOne(tenantId, id);
     return this.prisma.shoppingList.update({
       where: { id },
@@ -106,6 +105,7 @@ export class ShoppingListsService {
   }
 
   async remove(tenantId: string | null, id: string): Promise<ShoppingList> {
+    assertTenant(tenantId);
     await this.findOne(tenantId, id);
     return this.prisma.shoppingList.delete({ where: { id } });
   }
@@ -115,6 +115,7 @@ export class ShoppingListsService {
     listId: string,
     dto: CreateShoppingListItemDto,
   ): Promise<ShoppingListItem> {
+    assertTenant(tenantId);
     await this.findOne(tenantId, listId);
     await this.assertCategoryBelongsToTenant(tenantId, dto.categoryId);
     return this.prisma.shoppingListItem.create({
@@ -134,6 +135,7 @@ export class ShoppingListsService {
     itemId: string,
     dto: UpdateShoppingListItemDto,
   ): Promise<ShoppingListItem> {
+    assertTenant(tenantId);
     await this.findOne(tenantId, listId);
     const item = await this.prisma.shoppingListItem.findFirst({
       where: { id: itemId, shoppingListId: listId },
@@ -155,6 +157,7 @@ export class ShoppingListsService {
     listId: string,
     itemId: string,
   ): Promise<ShoppingListItem> {
+    assertTenant(tenantId);
     await this.findOne(tenantId, listId);
     const item = await this.prisma.shoppingListItem.findFirst({
       where: { id: itemId, shoppingListId: listId },
@@ -172,7 +175,7 @@ export class ShoppingListsService {
     id: string,
     dto: PurchaseShoppingListDto,
   ): Promise<ShoppingList & { items: ShoppingListItem[] }> {
-    this.assertTenant(tenantId);
+    assertTenant(tenantId);
     const list = await this.findOne(tenantId, id);
     if (list.purchasedAt)
       throw new BadRequestException('ShoppingList already purchased');
@@ -221,16 +224,14 @@ export class ShoppingListsService {
   }
 
   private async assertCategoryBelongsToTenant(
-    tenantId: string | null,
+    tenantId: string,
     categoryId?: string,
   ): Promise<void> {
     if (!categoryId) return;
     const category = await this.prisma.category.findFirst({
-      where: { id: categoryId, tenantId: tenantId ?? undefined },
+      where: { id: categoryId, tenantId },
     });
     if (!category)
       throw new NotFoundException(`Category with id ${categoryId} not found`);
   }
 }
-
-export type { Prisma };

@@ -4,20 +4,18 @@ import {
   Delete,
   Get,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   Request,
-  UseGuards,
 } from '@nestjs/common';
-import type { Budget } from '../../../generated/prisma/client';
+import type { Budget } from '../../generated/prisma/client';
 import type { AuthenticatedRequest } from '../auth/guards/auth.guard';
-import { AuthGuard } from '../auth/guards/auth.guard';
 import { BudgetsService, type BudgetWithUsage } from './budgets.service';
 import { CreateBudgetDto } from './dto/create-budget.dto';
 import { UpdateBudgetDto } from './dto/update-budget.dto';
 
 @Controller('budgets')
-@UseGuards(AuthGuard)
 export class BudgetsController {
   constructor(private readonly budgetsService: BudgetsService) {}
 
@@ -39,7 +37,7 @@ export class BudgetsController {
   @Get(':id')
   findOne(
     @Request() request: AuthenticatedRequest,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ): Promise<BudgetWithUsage> {
     return this.budgetsService.findOne(request.user.tenantId, id);
   }
@@ -47,7 +45,7 @@ export class BudgetsController {
   @Patch(':id')
   update(
     @Request() request: AuthenticatedRequest,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateBudgetDto,
   ): Promise<Budget> {
     return this.budgetsService.update(request.user.tenantId, id, dto);
@@ -56,7 +54,7 @@ export class BudgetsController {
   @Delete(':id')
   remove(
     @Request() request: AuthenticatedRequest,
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
   ): Promise<Budget> {
     return this.budgetsService.remove(request.user.tenantId, id);
   }

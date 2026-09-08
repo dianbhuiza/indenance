@@ -6,13 +6,17 @@ import {
   IsInt,
   IsOptional,
   IsString,
+  MaxLength,
   Min,
+  MinLength,
 } from 'class-validator';
-import { Interval } from '../../../../generated/prisma/client';
+import { Interval } from '../../../generated/prisma/client';
 
 export class CreateBudgetDto {
   @ApiProperty({ example: 'Comidas' })
   @IsString()
+  @MinLength(1)
+  @MaxLength(120)
   name!: string;
 
   @ApiProperty({ example: 1000 })

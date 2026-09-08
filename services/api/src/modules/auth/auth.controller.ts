@@ -22,6 +22,7 @@ import { parseDurationToMs } from './services/refresh-tokens.service';
 import { RequestPasswordResetDto, ResetPasswordDto } from './dto/password.dto';
 import { OAuthProfile } from './strategies/auth-strategy.interface';
 import { GOOGLE_PROVIDER } from './strategies/google.strategy';
+import { Public } from './guards/public.decorator';
 
 const REFRESH_TOKEN_COOKIE = 'refresh_token';
 const DEFAULT_REFRESH_TTL_MS = 7 * 24 * 60 * 60 * 1000;
@@ -65,12 +66,14 @@ export class AuthController {
     return token;
   }
 
+  @Public()
   @Post('register')
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   register(@Body() dto: RegisterDto) {
     return this.authService.register(dto);
   }
 
+  @Public()
   @Post('verify-email')
   async verifyEmail(
     @Body() dto: VerifyEmailDto,
@@ -82,6 +85,7 @@ export class AuthController {
     return rest;
   }
 
+  @Public()
   @Post('login')
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   async login(
@@ -94,6 +98,7 @@ export class AuthController {
     return rest;
   }
 
+  @Public()
   @Post('refresh')
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   async refresh(
@@ -120,6 +125,7 @@ export class AuthController {
     return { message: 'Logged out successfully' };
   }
 
+  @Public()
   @Post('forgot-password')
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   async forgotPassword(@Body() dto: RequestPasswordResetDto) {
@@ -130,16 +136,19 @@ export class AuthController {
     };
   }
 
+  @Public()
   @Post('reset-password')
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto.token, dto.newPassword);
   }
 
+  @Public()
   @Get('google')
   @UseGuards(PassportProtector(GOOGLE_PROVIDER))
   google() {}
 
+  @Public()
   @Get('google/callback')
   @UseGuards(PassportProtector(GOOGLE_PROVIDER))
   async googleCallback(
@@ -152,7 +161,7 @@ export class AuthController {
     const frontendUrl = this.config.frontendUrl;
     if (frontendUrl) {
       return res.redirect(
-        `${frontendUrl}/auth/callback#token=${session.accessToken}`,
+        `${frontendUrl}/auth/callback?token=${encodeURIComponent(session.accessToken)}`,
       );
     }
     const { refreshToken: _refreshToken, ...rest } = session;

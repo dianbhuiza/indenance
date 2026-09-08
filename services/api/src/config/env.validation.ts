@@ -1,14 +1,19 @@
 import { plainToInstance } from 'class-transformer';
-import { IsNumber, IsOptional, IsString, validateSync } from 'class-validator';
+import {
+  IsBoolean,
+  IsNumber,
+  IsOptional,
+  IsString,
+  validateSync,
+} from 'class-validator';
 
 class EnvironmentVariables {
   @IsOptional()
   @IsString()
   NODE_ENV?: string;
 
-  @IsOptional()
   @IsString()
-  DATABASE_URL?: string;
+  DATABASE_URL!: string;
 
   @IsOptional()
   @IsString()

@@ -28,6 +28,7 @@ export class GoogleStrategy
       clientSecret: config.googleClientSecret!,
       callbackURL: config.googleCallbackUrl,
       scope: ['email', 'profile'],
+      state: true,
     };
     super(options);
   }

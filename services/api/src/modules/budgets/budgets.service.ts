@@ -1,10 +1,10 @@
 import {
   BadRequestException,
-  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import type { Budget, Prisma } from '../../../generated/prisma/client';
+import type { Budget, Prisma } from '../../generated/prisma/client';
+import { assertTenant } from '../shared/assert-tenant';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBudgetDto } from './dto/create-budget.dto';
 import { UpdateBudgetDto } from './dto/update-budget.dto';
@@ -29,13 +29,8 @@ interface ActiveBudget {
 export class BudgetsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private assertTenant(tenantId: string | null): asserts tenantId is string {
-    if (!tenantId)
-      throw new ForbiddenException('User does not belong to a tenant');
-  }
-
   async create(tenantId: string | null, dto: CreateBudgetDto): Promise<Budget> {
-    this.assertTenant(tenantId);
+    assertTenant(tenantId);
     await this.assertCategoryBelongsToTenant(tenantId, dto.categoryId);
     this.validateDates(dto);
 
@@ -65,8 +60,9 @@ export class BudgetsService {
     tenantId: string | null,
     now: Date = new Date(),
   ): Promise<BudgetWithUsage[]> {
+    assertTenant(tenantId);
     const budgets = await this.prisma.budget.findMany({
-      where: { tenantId: tenantId ?? undefined },
+      where: { tenantId },
       orderBy: { startDate: 'asc' },
     });
     return Promise.all(
@@ -79,16 +75,17 @@ export class BudgetsService {
     id: string,
     now: Date = new Date(),
   ): Promise<BudgetWithUsage> {
+    assertTenant(tenantId);
     const budget = await this.findBudget(tenantId, id);
     return this.withUsage(budget, tenantId, now);
   }
 
   private async findBudget(
-    tenantId: string | null,
+    tenantId: string,
     id: string,
   ): Promise<Budget> {
     const budget = await this.prisma.budget.findFirst({
-      where: { id, tenantId: tenantId ?? undefined },
+      where: { id, tenantId },
     });
     if (!budget) throw new NotFoundException(`Budget with id ${id} not found`);
     return budget;
@@ -99,6 +96,7 @@ export class BudgetsService {
     id: string,
     dto: UpdateBudgetDto,
   ): Promise<Budget> {
+    assertTenant(tenantId);
     await this.findBudget(tenantId, id);
     if (dto.categoryId !== undefined) {
       await this.assertCategoryBelongsToTenant(tenantId, dto.categoryId);
@@ -139,6 +137,7 @@ export class BudgetsService {
   }
 
   async remove(tenantId: string | null, id: string): Promise<Budget> {
+    assertTenant(tenantId);
     await this.findBudget(tenantId, id);
     return this.prisma.budget.delete({ where: { id } });
   }
@@ -214,13 +213,13 @@ export class BudgetsService {
 
   private async withUsage(
     budget: Budget,
-    tenantId: string | null,
+    tenantId: string,
     now: Date,
   ): Promise<BudgetWithUsage> {
     const { start, end } = budgetPeriod(now, budget.startDate, budget.interval);
     const spent = await this.spendInPeriod(
       this.prisma,
-      tenantId ?? '',
+      tenantId,
       {
         id: budget.id,
         amount: budget.amount,

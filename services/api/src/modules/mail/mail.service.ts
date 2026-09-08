@@ -6,6 +6,15 @@ import { RESEND_CLIENT } from './mail.constants';
 const VERIFICATION_SUBJECT = 'Confirma tu cuenta en Indenance';
 const PASSWORD_RESET_SUBJECT = 'Restablece tu contraseña en Indenance';
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 @Injectable()
 export class MailService {
   private readonly logger = new Logger(MailService.name);
@@ -31,7 +40,7 @@ export class MailService {
       return;
     }
 
-    const firstName = name?.split(' ')[0] ?? '';
+    const firstName = escapeHtml(name?.split(' ')[0] ?? '');
     const greeting = firstName ? `Hola ${firstName},` : 'Hola,';
 
     await this.client.emails.send({
@@ -71,7 +80,7 @@ export class MailService {
       return;
     }
 
-    const firstName = name?.split(' ')[0] ?? '';
+    const firstName = escapeHtml(name?.split(' ')[0] ?? '');
     const greeting = firstName ? `Hola ${firstName},` : 'Hola,';
 
     await this.client.emails.send({

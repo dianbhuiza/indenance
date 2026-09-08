@@ -1,5 +1,5 @@
 import { addDays, addMonths, addWeeks, addYears } from 'date-fns';
-import type { Interval } from '../../../generated/prisma/client';
+import type { Interval } from '../../generated/prisma/client';
 
 export function advanceScheduledAt(
   scheduledAt: Date,

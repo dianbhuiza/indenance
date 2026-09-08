@@ -1,9 +1,9 @@
 import {
-  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import type { Prisma, Transaction } from '../../../generated/prisma/client';
+import type { Prisma, Transaction } from '../../generated/prisma/client';
+import { assertTenant } from '../shared/assert-tenant';
 import { BudgetsService } from '../budgets/budgets.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TransactionContextService } from '../shared/transaction-context/transaction-context.service';
@@ -17,17 +17,12 @@ export class TransactionsService {
     private readonly budgetsService: BudgetsService,
   ) {}
 
-  private assertTenant(tenantId: string | null): asserts tenantId is string {
-    if (!tenantId)
-      throw new ForbiddenException('User does not belong to a tenant');
-  }
-
   async record(
     userId: string,
     tenantId: string | null,
     dto: CreateTransactionDto,
   ): Promise<Transaction> {
-    this.assertTenant(tenantId);
+    assertTenant(tenantId);
     if (this.txContext.isActive()) {
       return this.recordWith(this.txContext.client(), userId, tenantId, dto);
     }
@@ -83,8 +78,9 @@ export class TransactionsService {
     userId: string,
     tenantId: string | null,
   ): Promise<Transaction[]> {
+    assertTenant(tenantId);
     return this.prisma.transaction.findMany({
-      where: { tenantId: tenantId ?? undefined, account: { userId } },
+      where: { tenantId, account: { userId } },
       include: { account: true, category: true },
       orderBy: { createdAt: 'desc' },
     });

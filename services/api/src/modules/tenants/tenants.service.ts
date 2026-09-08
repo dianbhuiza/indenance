@@ -3,14 +3,18 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Tenant } from '../../../generated/prisma/client';
+import { Tenant } from '../../generated/prisma/client';
+import { CategoriesService } from '../categories/categories.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
 
 @Injectable()
 export class TenantsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly categoriesService: CategoriesService,
+  ) {}
 
   async createForUser(userId: string, dto: CreateTenantDto): Promise<Tenant> {
     const user = await this.prisma.user.findUnique({
@@ -26,6 +30,7 @@ export class TenantsService {
         where: { id: userId },
         data: { tenantId: tenant.id },
       });
+      await this.categoriesService.seedDefaults(tenant.id);
       return tenant;
     });
   }

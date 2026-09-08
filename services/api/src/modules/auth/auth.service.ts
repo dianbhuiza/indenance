@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { AppConfig } from '../../config/app.config';
-import { Tenant } from '../../../generated/prisma/client';
+import { Tenant } from '../../generated/prisma/client';
 import { MailService } from '../mail/mail.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
@@ -166,7 +166,12 @@ export class AuthService {
     });
     if (!result) throw new UnauthorizedException('Invalid credentials');
 
-    const user = await this.usersService.findOne(result.userId);
+    let user;
+    try {
+      user = await this.usersService.findOne(result.userId);
+    } catch {
+      throw new UnauthorizedException('Invalid credentials');
+    }
     if (!user.emailVerifiedAt)
       throw new UnauthorizedException(
         'Please verify your email before logging in',
@@ -291,6 +296,8 @@ export class AuthService {
       payload.sub,
       newPassword,
     );
+
+    await this.refreshTokensService.revokeAllForUser(payload.sub);
 
     return { message: 'Password updated successfully' };
   }

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import type { Transaction } from '../../../../generated/prisma/client';
+import type { Transaction } from '../../../generated/prisma/client';
 import { TRANSACTION_REQUESTED_EVENT } from '../events/transaction-requested.event';
 import type { TransactionRequestedPayload } from '../events/transaction-requested.event';
 import { TransactionsService } from '../transactions.service';
