@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Tenant } from '../../generated/prisma/client';
+import type { Prisma } from '../../generated/prisma/client';
 import { CategoriesService } from '../categories/categories.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTenantDto } from './dto/create-tenant.dto';
@@ -16,7 +17,13 @@ export class TenantsService {
     private readonly categoriesService: CategoriesService,
   ) {}
 
-  async createForUser(userId: string, dto: CreateTenantDto): Promise<Tenant> {
+  async createForUser(
+    userId: string,
+    dto: CreateTenantDto,
+    db?: Prisma.TransactionClient,
+  ): Promise<Tenant> {
+    if (db) return this.createWith(userId, dto, db);
+
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: { tenantId: true },
@@ -24,15 +31,23 @@ export class TenantsService {
     if (user?.tenantId)
       throw new ConflictException('User already belongs to a tenant');
 
-    return this.prisma.$transaction(async (tx) => {
-      const tenant = await tx.tenant.create({ data: { name: dto.name } });
-      await tx.user.update({
-        where: { id: userId },
-        data: { tenantId: tenant.id },
-      });
-      await this.categoriesService.seedDefaults(tenant.id);
-      return tenant;
+    return this.prisma.$transaction((tx) => this.createWith(userId, dto, tx));
+  }
+
+  private async createWith(
+    userId: string,
+    dto: CreateTenantDto,
+    tx: Prisma.TransactionClient,
+  ): Promise<Tenant> {
+    const tenant = await tx.tenant.create({ data: { name: dto.name } });
+    const claimed = await tx.user.updateMany({
+      where: { id: userId, tenantId: null },
+      data: { tenantId: tenant.id },
     });
+    if (claimed.count === 0)
+      throw new ConflictException('User already belongs to a tenant');
+    await this.categoriesService.seedDefaults(tenant.id, tx);
+    return tenant;
   }
 
   async findByUserId(userId: string): Promise<Tenant | null> {

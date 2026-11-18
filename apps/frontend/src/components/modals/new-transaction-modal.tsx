@@ -1,21 +1,17 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Dialog, Button, Select } from '@/components/ui';
 import { X, ArrowRightLeft, Search, Check } from 'lucide-react';
 import { api } from '@/lib/api';
+import {
+  getApiErrorMessage,
+  transactionSchema,
+  useAccountsQuery,
+  useCategoriesQuery,
+  type TransactionFormData,
+} from '@indenance/core';
 import clsx from 'clsx';
-
-const schema = z.object({
-  type: z.enum(['EXPENSE', 'INCOME']),
-  amount: z.coerce.number().int().min(1, 'El monto debe ser mayor a 0'),
-  accountId: z.string().uuid('Selecciona una cuenta'),
-  categoryId: z.string().optional(),
-});
-
-type FormData = z.infer<typeof schema>;
 
 interface NewTransactionModalProps {
   open: boolean;
@@ -23,17 +19,9 @@ interface NewTransactionModalProps {
 }
 
 export function NewTransactionModal({ open, onOpenChange }: NewTransactionModalProps) {
-  const { data: accounts = [] } = useQuery({
-    queryKey: ['accounts'],
-    queryFn: () => api.get('/accounts').then((r) => r.data),
-    enabled: open,
-  });
+  const { data: accounts = [] } = useAccountsQuery({ enabled: open });
 
-  const { data: categories = [] } = useQuery({
-    queryKey: ['categories'],
-    queryFn: () => api.get('/categories').then((r) => r.data),
-    enabled: open,
-  });
+  const { data: categories = [] } = useCategoriesQuery({ enabled: open });
 
   const {
     register,
@@ -42,8 +30,8 @@ export function NewTransactionModal({ open, onOpenChange }: NewTransactionModalP
     watch,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<FormData>({
-    resolver: zodResolver(schema),
+  } = useForm<TransactionFormData>({
+    resolver: zodResolver(transactionSchema),
     defaultValues: { type: 'EXPENSE', amount: 0, accountId: '' },
   });
 
@@ -55,16 +43,13 @@ export function NewTransactionModal({ open, onOpenChange }: NewTransactionModalP
     cat.name.toLowerCase().includes(categorySearch.toLowerCase()),
   );
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: TransactionFormData) => {
     try {
       await api.post('/transactions', data);
       reset();
       onOpenChange(false);
     } catch (err: unknown) {
-      const message =
-        (err as { response?: { data?: { message?: string } } })?.response?.data
-          ?.message ?? 'Error al crear la transacción';
-      alert(message);
+      alert(getApiErrorMessage(err, 'Error al crear la transacción'));
     }
   };
 
@@ -154,6 +139,9 @@ export function NewTransactionModal({ open, onOpenChange }: NewTransactionModalP
                 <Select.Portal>
                   <Select.Positioner>
                     <Select.Popup>
+                      <Select.Item value="">
+                        Seleccionar cuenta...
+                      </Select.Item>
                       {accounts.map((account: { id: string; name: string; currency: string }) => (
                         <Select.Item key={account.id} value={account.id}>
                           {account.name} ({account.currency})

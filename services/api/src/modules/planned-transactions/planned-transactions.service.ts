@@ -4,11 +4,13 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import type {
+  Interval,
   Prisma,
   PlannedTransaction,
   PlannedTransactionStatus,
 } from '../../generated/prisma/client';
 import { assertTenant } from '../shared/assert-tenant';
+import { assertCategoryBelongsToTenant } from '../shared/assert-category';
 import { PrismaService } from '../prisma/prisma.service';
 import { TransactionContextService } from '../shared/transaction-context/transaction-context.service';
 import { CreatePlannedTransactionDto } from './dto/create-planned-transaction.dto';
@@ -25,6 +27,14 @@ export class PlannedTransactionsService {
     if (dto.isRecurring && !dto.interval)
       throw new BadRequestException(
         'interval is required when isRecurring is true',
+      );
+    if (!dto.isRecurring && dto.interval)
+      throw new BadRequestException(
+        'interval can only be set when isRecurring is true',
+      );
+    if (dto.occurrences !== undefined && !dto.isRecurring)
+      throw new BadRequestException(
+        'occurrences can only be set when isRecurring is true',
       );
   }
 
@@ -50,7 +60,7 @@ export class PlannedTransactionsService {
     dto: CreatePlannedTransactionDto,
   ): Promise<PlannedTransaction> {
     await this.assertAccountBelongsToUser(tx, userId, tenantId, dto.accountId);
-    await this.assertCategoryBelongsToTenant(tx, tenantId, dto.categoryId);
+    await assertCategoryBelongsToTenant(tx, tenantId, dto.categoryId);
 
     return tx.plannedTransaction.create({
       data: {
@@ -61,6 +71,8 @@ export class PlannedTransactionsService {
         scheduledAt: dto.scheduledAt ?? new Date(),
         isRecurring: dto.isRecurring ?? false,
         interval: dto.isRecurring ? dto.interval : null,
+        requiresApproval: dto.requiresApproval ?? true,
+        occurrences: dto.isRecurring ? (dto.occurrences ?? null) : null,
         categoryId: dto.categoryId ?? null,
       },
     });
@@ -82,7 +94,10 @@ export class PlannedTransactionsService {
       where: {
         tenantId,
         deletedAt: null,
-        status: status && validStatuses.includes(status) ? (status as PlannedTransactionStatus) : undefined,
+        status:
+          status && validStatuses.includes(status)
+            ? (status as PlannedTransactionStatus)
+            : undefined,
         account: { userId },
       },
       include: { account: true, category: true },
@@ -101,7 +116,6 @@ export class PlannedTransactionsService {
         id,
         tenantId,
         deletedAt: null,
-        status: 'ACTIVE',
         account: { userId },
       },
     });
@@ -118,20 +132,51 @@ export class PlannedTransactionsService {
   ): Promise<PlannedTransaction> {
     assertTenant(tenantId);
     const existing = await this.findOne(userId, tenantId, id);
-    if (dto.isRecurring === true && !dto.interval)
+    if (existing.status !== 'ACTIVE')
+      throw new BadRequestException(
+        'Cannot modify a COMPLETED planned transaction',
+      );
+
+    const isRecurring = dto.isRecurring ?? existing.isRecurring;
+    const interval = isRecurring ? (dto.interval ?? existing.interval) : null;
+    if (isRecurring && !interval)
       throw new BadRequestException(
         'interval is required when isRecurring is true',
       );
+    if (!isRecurring && dto.interval !== undefined)
+      throw new BadRequestException(
+        'interval can only be set when isRecurring is true',
+      );
+    if (!isRecurring && dto.occurrences !== undefined)
+      throw new BadRequestException(
+        'occurrences can only be set when isRecurring is true',
+      );
 
+    const requiresApproval = dto.requiresApproval ?? existing.requiresApproval;
+    const occurrences = isRecurring
+      ? dto.occurrences !== undefined
+        ? dto.occurrences
+        : existing.occurrences
+      : null;
+    if (occurrences !== null && occurrences < existing.completedOccurrences)
+      throw new BadRequestException(
+        `occurrences cannot be lower than the number of completed occurrences (${existing.completedOccurrences})`,
+      );
+
+    const args = {
+      id,
+      existing,
+      dto,
+      isRecurring,
+      interval,
+      requiresApproval,
+      occurrences,
+    };
     if (this.txContext.isActive()) {
-      return this.updateWith(this.txContext.client(), userId, tenantId, {
-        id,
-        existing,
-        dto,
-      });
+      return this.updateWith(this.txContext.client(), userId, tenantId, args);
     }
     return this.prisma.$transaction((tx) =>
-      this.updateWith(tx, userId, tenantId, { id, existing, dto }),
+      this.updateWith(tx, userId, tenantId, args),
     );
   }
 
@@ -143,6 +188,10 @@ export class PlannedTransactionsService {
       id: string;
       existing: PlannedTransaction;
       dto: UpdatePlannedTransactionDto;
+      isRecurring: boolean;
+      interval: Interval | null;
+      requiresApproval: boolean;
+      occurrences: number | null;
     },
   ): Promise<PlannedTransaction> {
     const { id, dto } = args;
@@ -154,20 +203,34 @@ export class PlannedTransactionsService {
         dto.accountId,
       );
     }
-    await this.assertCategoryBelongsToTenant(tx, tenantId, dto.categoryId);
+    await assertCategoryBelongsToTenant(tx, tenantId, dto.categoryId);
 
-    return tx.plannedTransaction.update({
-      where: { id },
+    const updated = await tx.plannedTransaction.updateMany({
+      where: {
+        id,
+        tenantId,
+        deletedAt: null,
+        status: 'ACTIVE',
+        account: { userId },
+      },
       data: {
-        accountId: dto.accountId,
-        amount: dto.amount,
-        type: dto.type,
-        scheduledAt: dto.scheduledAt,
-        isRecurring: dto.isRecurring,
-        interval: dto.isRecurring === false ? null : dto.interval,
-        categoryId: dto.categoryId,
+        ...(dto.accountId !== undefined && { accountId: dto.accountId }),
+        ...(dto.amount !== undefined && { amount: dto.amount }),
+        ...(dto.type !== undefined && { type: dto.type }),
+        ...(dto.scheduledAt !== undefined && { scheduledAt: dto.scheduledAt }),
+        ...(dto.categoryId !== undefined && {
+          categoryId: dto.categoryId ?? null,
+        }),
+        isRecurring: args.isRecurring,
+        interval: args.interval,
+        requiresApproval: args.requiresApproval,
+        occurrences: args.occurrences,
       },
     });
+    if (updated.count === 0)
+      throw new NotFoundException(`PlannedTransaction with id ${id} not found`);
+
+    return tx.plannedTransaction.findUniqueOrThrow({ where: { id } });
   }
 
   async softDelete(
@@ -178,23 +241,36 @@ export class PlannedTransactionsService {
     assertTenant(tenantId);
     await this.findOne(userId, tenantId, id);
     if (this.txContext.isActive()) {
-      return this.softDeleteWith(this.txContext.client(), id);
+      return this.softDeleteWith(this.txContext.client(), userId, tenantId, id);
     }
-    return this.prisma.$transaction((tx) => this.softDeleteWith(tx, id));
+    return this.prisma.$transaction((tx) =>
+      this.softDeleteWith(tx, userId, tenantId, id),
+    );
   }
 
   private async softDeleteWith(
     tx: Prisma.TransactionClient,
+    userId: string,
+    tenantId: string,
     id: string,
   ): Promise<PlannedTransaction> {
     await tx.plannedTransactionAlert.updateMany({
       where: { plannedTransactionId: id, status: 'PENDING' },
       data: { status: 'REJECTED', resolvedAt: new Date() },
     });
-    return tx.plannedTransaction.update({
-      where: { id },
+    const updated = await tx.plannedTransaction.updateMany({
+      where: {
+        id,
+        tenantId,
+        deletedAt: null,
+        status: 'ACTIVE',
+        account: { userId },
+      },
       data: { deletedAt: new Date() },
     });
+    if (updated.count === 0)
+      throw new NotFoundException(`PlannedTransaction with id ${id} not found`);
+    return tx.plannedTransaction.findUniqueOrThrow({ where: { id } });
   }
 
   async remove(
@@ -203,8 +279,13 @@ export class PlannedTransactionsService {
     id: string,
   ): Promise<PlannedTransaction> {
     assertTenant(tenantId);
-    await this.findOne(userId, tenantId, id);
-    return this.prisma.plannedTransaction.delete({ where: { id } });
+    const planned = await this.findOne(userId, tenantId, id);
+    const deleted = await this.prisma.plannedTransaction.deleteMany({
+      where: { id, tenantId, account: { userId } },
+    });
+    if (deleted.count === 0)
+      throw new NotFoundException(`PlannedTransaction with id ${id} not found`);
+    return planned;
   }
 
   private async assertAccountBelongsToUser(
@@ -218,18 +299,5 @@ export class PlannedTransactionsService {
     });
     if (!account)
       throw new NotFoundException(`Account with id ${accountId} not found`);
-  }
-
-  private async assertCategoryBelongsToTenant(
-    tx: Prisma.TransactionClient,
-    tenantId: string,
-    categoryId?: string,
-  ): Promise<void> {
-    if (!categoryId) return;
-    const category = await tx.category.findFirst({
-      where: { id: categoryId, tenantId },
-    });
-    if (!category)
-      throw new NotFoundException(`Category with id ${categoryId} not found`);
   }
 }

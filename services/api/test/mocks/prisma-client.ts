@@ -38,6 +38,20 @@ export const PlannedTransactionAlertStatus = {
 export type PlannedTransactionAlertStatus =
   (typeof PlannedTransactionAlertStatus)[keyof typeof PlannedTransactionAlertStatus];
 
+export const LoanStatus = {
+  ACTIVE: 'ACTIVE',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED',
+} as const;
+export type LoanStatus = (typeof LoanStatus)[keyof typeof LoanStatus];
+
+export const LoanInstallmentStatus = {
+  PENDING: 'PENDING',
+  PAID: 'PAID',
+} as const;
+export type LoanInstallmentStatus =
+  (typeof LoanInstallmentStatus)[keyof typeof LoanInstallmentStatus];
+
 export type User = Record<string, any>;
 export type AuthMethod = Record<string, any>;
 export type RefreshToken = Record<string, any>;
@@ -46,4 +60,6 @@ export type PlannedTransactionAlert = Record<string, any>;
 export type ShoppingList = Record<string, any>;
 export type ShoppingListItem = Record<string, any>;
 export type Budget = Record<string, any>;
+export type Loan = Record<string, any>;
+export type LoanInstallment = Record<string, any>;
 export type Prisma = Record<string, any>;

@@ -2,17 +2,9 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Button, Input } from '@/components/ui';
 import { api } from '@/lib/api';
-
-const registerSchema = z.object({
-  name: z.string().max(120, 'Muy largo').optional(),
-  email: z.string().email('Email inválido'),
-  password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
-});
-
-type RegisterFormData = z.infer<typeof registerSchema>;
+import { getApiErrorMessage, registerSchema, type RegisterFormData } from '@indenance/core';
 
 export function RegisterPage() {
   const navigate = useNavigate();
@@ -34,10 +26,7 @@ export function RegisterPage() {
         state: { message: 'Cuenta creada. Revisa tu email para verificar tu cuenta.' },
       });
     } catch (err: unknown) {
-      const message =
-        (err as { response?: { data?: { message?: string } } })?.response?.data
-          ?.message ?? 'Error al crear la cuenta';
-      setServerError(message);
+      setServerError(getApiErrorMessage(err, 'Error al crear la cuenta'));
     }
   };
 

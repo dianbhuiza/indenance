@@ -48,6 +48,26 @@ export class CreatePlannedTransactionDto {
   @IsEnum(Interval)
   interval?: Interval;
 
+  @ApiPropertyOptional({
+    example: false,
+    default: true,
+    description:
+      'false = la transacción se ejecuta automáticamente; true = genera una alerta que debe aprobarse',
+  })
+  @IsOptional()
+  @IsBoolean()
+  requiresApproval?: boolean;
+
+  @ApiPropertyOptional({
+    example: 12,
+    description:
+      'Cantidad de veces que debe ejecutarse; null/omitido = indefinido. Solo aplica cuando isRecurring es true',
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  occurrences?: number;
+
   @ApiPropertyOptional({ example: 'c1d9d0e3-2f0a-4b2c-8a4e-9f3e2d1a0b0c' })
   @IsOptional()
   @IsString()

@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import type { Prisma } from '../../../generated/prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { BcryptService } from '../services/bcrypt.service';
 import {
@@ -19,10 +20,11 @@ export class CredentialsStrategy implements CredentialStrategy {
     private readonly bcrypt: BcryptService,
   ) {}
 
-  async create(input: CreateAuthMethodInput) {
+  async create(input: CreateAuthMethodInput, db?: Prisma.TransactionClient) {
     const password = await this.bcrypt.hash(input.password ?? '');
+    const client: Prisma.TransactionClient = db ?? this.prisma;
 
-    return this.prisma.authMethod.create({
+    return client.authMethod.create({
       data: {
         userId: input.userId,
         provider: this.provider,

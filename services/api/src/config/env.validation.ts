@@ -1,11 +1,5 @@
 import { plainToInstance } from 'class-transformer';
-import {
-  IsBoolean,
-  IsNumber,
-  IsOptional,
-  IsString,
-  validateSync,
-} from 'class-validator';
+import { IsNumber, IsOptional, IsString, validateSync } from 'class-validator';
 
 class EnvironmentVariables {
   @IsOptional()
@@ -14,6 +8,10 @@ class EnvironmentVariables {
 
   @IsString()
   DATABASE_URL!: string;
+
+  @IsOptional()
+  @IsString()
+  DIRECT_URL?: string;
 
   @IsOptional()
   @IsString()
@@ -54,6 +52,10 @@ class EnvironmentVariables {
   @IsOptional()
   @IsString()
   PLANNED_TX_CRON?: string;
+
+  @IsOptional()
+  @IsString()
+  ADMIN_EMAILS?: string;
 
   @IsOptional()
   @IsNumber()

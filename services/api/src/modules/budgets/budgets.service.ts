@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import type { Budget, Prisma } from '../../generated/prisma/client';
 import { assertTenant } from '../shared/assert-tenant';
+import { assertCategoryBelongsToTenant } from '../shared/assert-category';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBudgetDto } from './dto/create-budget.dto';
 import { UpdateBudgetDto } from './dto/update-budget.dto';
@@ -14,6 +15,7 @@ export interface BudgetWithUsage extends Budget {
   spent: number;
   remaining: number;
   isExceeded: boolean;
+  isActive: boolean;
 }
 
 interface ActiveBudget {
@@ -31,7 +33,7 @@ export class BudgetsService {
 
   async create(tenantId: string | null, dto: CreateBudgetDto): Promise<Budget> {
     assertTenant(tenantId);
-    await this.assertCategoryBelongsToTenant(tenantId, dto.categoryId);
+    await assertCategoryBelongsToTenant(this.prisma, tenantId, dto.categoryId);
     this.validateDates(dto);
 
     const startDate = dto.startDate ? new Date(dto.startDate) : new Date();
@@ -39,6 +41,11 @@ export class BudgetsService {
     if (isRecurring && !dto.interval) {
       throw new BadRequestException(
         'interval is required when isRecurring is true',
+      );
+    }
+    if (!isRecurring && dto.interval) {
+      throw new BadRequestException(
+        'interval can only be set when isRecurring is true',
       );
     }
 
@@ -80,10 +87,7 @@ export class BudgetsService {
     return this.withUsage(budget, tenantId, now);
   }
 
-  private async findBudget(
-    tenantId: string,
-    id: string,
-  ): Promise<Budget> {
+  private async findBudget(tenantId: string, id: string): Promise<Budget> {
     const budget = await this.prisma.budget.findFirst({
       where: { id, tenantId },
     });
@@ -97,11 +101,28 @@ export class BudgetsService {
     dto: UpdateBudgetDto,
   ): Promise<Budget> {
     assertTenant(tenantId);
-    await this.findBudget(tenantId, id);
+    const existing = await this.findBudget(tenantId, id);
     if (dto.categoryId !== undefined) {
-      await this.assertCategoryBelongsToTenant(tenantId, dto.categoryId);
+      await assertCategoryBelongsToTenant(
+        this.prisma,
+        tenantId,
+        dto.categoryId,
+      );
     }
-    this.validateDates(dto);
+    this.validateDates(dto, existing);
+
+    const isRecurring = dto.isRecurring ?? existing.isRecurring;
+    const interval = isRecurring ? (dto.interval ?? existing.interval) : null;
+    if (isRecurring && !interval) {
+      throw new BadRequestException(
+        'interval is required when isRecurring is true',
+      );
+    }
+    if (!isRecurring && dto.interval !== undefined) {
+      throw new BadRequestException(
+        'interval can only be set when isRecurring is true',
+      );
+    }
 
     const data: Prisma.BudgetUpdateInput = {
       ...(dto.name !== undefined && { name: dto.name }),
@@ -112,34 +133,39 @@ export class BudgetsService {
       ...(dto.endDate !== undefined && {
         endDate: dto.endDate ? new Date(dto.endDate) : null,
       }),
-      ...(dto.isRecurring !== undefined && { isRecurring: dto.isRecurring }),
       ...(dto.categoryId !== undefined && {
         categoryId: dto.categoryId ?? null,
       }),
+      isRecurring,
+      interval,
     };
 
-    if (dto.isRecurring === true && dto.interval === undefined) {
-      const current = await this.prisma.budget.findUnique({ where: { id } });
-      if (!current?.interval) {
-        throw new BadRequestException(
-          'interval is required when isRecurring is true',
-        );
-      }
-    }
-    if (dto.interval !== undefined) {
-      data.interval = dto.interval;
-    }
-    if (dto.isRecurring === false) {
-      data.interval = null;
-    }
+    const windowChanged =
+      dto.amount !== undefined ||
+      dto.startDate !== undefined ||
+      dto.endDate !== undefined ||
+      dto.interval !== undefined ||
+      dto.isRecurring !== undefined;
+    if (windowChanged) data.exceededAt = null;
 
-    return this.prisma.budget.update({ where: { id }, data });
+    const updated = await this.prisma.budget.updateMany({
+      where: { id, tenantId },
+      data,
+    });
+    if (updated.count === 0)
+      throw new NotFoundException(`Budget with id ${id} not found`);
+    return this.findBudget(tenantId, id);
   }
 
   async remove(tenantId: string | null, id: string): Promise<Budget> {
     assertTenant(tenantId);
-    await this.findBudget(tenantId, id);
-    return this.prisma.budget.delete({ where: { id } });
+    const budget = await this.findBudget(tenantId, id);
+    const deleted = await this.prisma.budget.deleteMany({
+      where: { id, tenantId },
+    });
+    if (deleted.count === 0)
+      throw new NotFoundException(`Budget with id ${id} not found`);
+    return budget;
   }
 
   /**
@@ -175,19 +201,31 @@ export class BudgetsService {
         now,
         budget.startDate,
         budget.interval,
+        budget.endDate,
       );
       const spent = await this.spendInPeriod(tx, tenantId, budget, start, end);
-      if (spent + amount > budget.amount) {
+      const overLimit = spent + amount > budget.amount;
+      if (overLimit && !budget.exceededAt) {
         await tx.budget.update({
           where: { id: budget.id },
-          data: { exceededAt: budget.exceededAt ?? now },
+          data: { exceededAt: now },
+        });
+      } else if (!overLimit && budget.exceededAt) {
+        await tx.budget.update({
+          where: { id: budget.id },
+          data: { exceededAt: null },
         });
       }
     }
   }
 
   private isActiveInPeriod(budget: ActiveBudget, now: Date): boolean {
-    const { start, end } = budgetPeriod(now, budget.startDate, budget.interval);
+    const { start, end } = budgetPeriod(
+      now,
+      budget.startDate,
+      budget.interval,
+      budget.endDate,
+    );
     if (end) return now >= start && now < end;
     return now >= start;
   }
@@ -216,7 +254,12 @@ export class BudgetsService {
     tenantId: string,
     now: Date,
   ): Promise<BudgetWithUsage> {
-    const { start, end } = budgetPeriod(now, budget.startDate, budget.interval);
+    const { start, end } = budgetPeriod(
+      now,
+      budget.startDate,
+      budget.interval,
+      budget.endDate,
+    );
     const spent = await this.spendInPeriod(
       this.prisma,
       tenantId,
@@ -231,30 +274,31 @@ export class BudgetsService {
       start,
       end,
     );
+    const isExceeded = spent > budget.amount;
     return {
       ...budget,
       spent,
       remaining: budget.amount - spent,
-      isExceeded: spent > budget.amount,
+      isExceeded,
+      isActive: now >= start && (end ? now < end : true),
+      exceededAt: isExceeded ? budget.exceededAt : null,
     };
   }
 
-  private validateDates(dto: CreateBudgetDto | UpdateBudgetDto): void {
-    if (!dto.startDate || !dto.endDate) return;
-    if (new Date(dto.endDate) <= new Date(dto.startDate)) {
+  private validateDates(
+    dto: CreateBudgetDto | UpdateBudgetDto,
+    existing?: Budget,
+  ): void {
+    const start = dto.startDate ? new Date(dto.startDate) : existing?.startDate;
+    const end =
+      dto.endDate !== undefined
+        ? dto.endDate
+          ? new Date(dto.endDate)
+          : null
+        : (existing?.endDate ?? null);
+    if (!start || !end) return;
+    if (end <= start) {
       throw new BadRequestException('endDate must be after startDate');
     }
-  }
-
-  private async assertCategoryBelongsToTenant(
-    tenantId: string | null,
-    categoryId?: string,
-  ): Promise<void> {
-    if (!categoryId) return;
-    const category = await this.prisma.category.findFirst({
-      where: { id: categoryId, tenantId: tenantId ?? undefined },
-    });
-    if (!category)
-      throw new NotFoundException(`Category with id ${categoryId} not found`);
   }
 }

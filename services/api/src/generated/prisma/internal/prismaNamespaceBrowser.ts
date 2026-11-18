@@ -62,7 +62,9 @@ export const ModelName = {
   PlannedTransaction: 'PlannedTransaction',
   PlannedTransactionAlert: 'PlannedTransactionAlert',
   ShoppingList: 'ShoppingList',
-  ShoppingListItem: 'ShoppingListItem'
+  ShoppingListItem: 'ShoppingListItem',
+  Loan: 'Loan',
+  LoanInstallment: 'LoanInstallment'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -87,6 +89,9 @@ export const UserScalarFieldEnum = {
   name: 'name',
   phone: 'phone',
   emailVerifiedAt: 'emailVerifiedAt',
+  role: 'role',
+  passwordResetTokenHash: 'passwordResetTokenHash',
+  passwordResetExpiresAt: 'passwordResetExpiresAt',
   tenantId: 'tenantId'
 } as const
 
@@ -191,7 +196,11 @@ export const PlannedTransactionScalarFieldEnum = {
   categoryId: 'categoryId',
   tenantId: 'tenantId',
   deletedAt: 'deletedAt',
-  status: 'status'
+  status: 'status',
+  requiresApproval: 'requiresApproval',
+  occurrences: 'occurrences',
+  completedOccurrences: 'completedOccurrences',
+  loanId: 'loanId'
 } as const
 
 export type PlannedTransactionScalarFieldEnum = (typeof PlannedTransactionScalarFieldEnum)[keyof typeof PlannedTransactionScalarFieldEnum]
@@ -208,6 +217,7 @@ export const PlannedTransactionAlertScalarFieldEnum = {
   dueAt: 'dueAt',
   status: 'status',
   transactionId: 'transactionId',
+  loanInstallmentId: 'loanInstallmentId',
   createdAt: 'createdAt',
   resolvedAt: 'resolvedAt'
 } as const
@@ -237,6 +247,42 @@ export const ShoppingListItemScalarFieldEnum = {
 } as const
 
 export type ShoppingListItemScalarFieldEnum = (typeof ShoppingListItemScalarFieldEnum)[keyof typeof ShoppingListItemScalarFieldEnum]
+
+
+export const LoanScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  accountId: 'accountId',
+  tenantId: 'tenantId',
+  principal: 'principal',
+  interestPercent: 'interestPercent',
+  totalRepayment: 'totalRepayment',
+  interestAmount: 'interestAmount',
+  installments: 'installments',
+  installmentAmount: 'installmentAmount',
+  interval: 'interval',
+  startDate: 'startDate',
+  status: 'status',
+  deletedAt: 'deletedAt',
+  createdAt: 'createdAt',
+  categoryId: 'categoryId'
+} as const
+
+export type LoanScalarFieldEnum = (typeof LoanScalarFieldEnum)[keyof typeof LoanScalarFieldEnum]
+
+
+export const LoanInstallmentScalarFieldEnum = {
+  id: 'id',
+  loanId: 'loanId',
+  number: 'number',
+  dueAt: 'dueAt',
+  amount: 'amount',
+  status: 'status',
+  paidAt: 'paidAt',
+  transactionId: 'transactionId'
+} as const
+
+export type LoanInstallmentScalarFieldEnum = (typeof LoanInstallmentScalarFieldEnum)[keyof typeof LoanInstallmentScalarFieldEnum]
 
 
 export const SortOrder = {

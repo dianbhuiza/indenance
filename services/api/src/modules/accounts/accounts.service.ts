@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -57,8 +58,14 @@ export class AccountsService {
     id: string,
     dto: UpdateAccountDto,
   ): Promise<Account> {
-    await this.findOne(userId, tenantId, id);
-    return this.prisma.account.update({ where: { id }, data: dto });
+    assertTenant(tenantId);
+    const updated = await this.prisma.account.updateMany({
+      where: { id, userId, tenantId },
+      data: dto,
+    });
+    if (updated.count === 0)
+      throw new NotFoundException(`Account with id ${id} not found`);
+    return this.findOne(userId, tenantId, id);
   }
 
   async remove(
@@ -66,7 +73,24 @@ export class AccountsService {
     tenantId: string | null,
     id: string,
   ): Promise<Account> {
-    await this.findOne(userId, tenantId, id);
-    return this.prisma.account.delete({ where: { id } });
+    assertTenant(tenantId);
+    const account = await this.findOne(userId, tenantId, id);
+
+    const [transactions, plannedTransactions] = await Promise.all([
+      this.prisma.transaction.count({ where: { accountId: id } }),
+      this.prisma.plannedTransaction.count({ where: { accountId: id } }),
+    ]);
+    if (transactions > 0 || plannedTransactions > 0) {
+      throw new ConflictException(
+        'Cannot delete an account with transactions or planned transactions',
+      );
+    }
+
+    const deleted = await this.prisma.account.deleteMany({
+      where: { id, userId, tenantId },
+    });
+    if (deleted.count === 0)
+      throw new NotFoundException(`Account with id ${id} not found`);
+    return account;
   }
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '@/lib/api';
+import { getApiErrorMessage } from '@indenance/core';
 import { useAuthStore } from '@/stores/auth.store';
 import { Button } from '@/components/ui';
 
@@ -26,10 +27,8 @@ export function VerifyEmailPage() {
         setStatus('success');
         setTimeout(() => navigate('/dashboard'), 2000);
       })
-      .catch((err) => {
-        const message =
-          err.response?.data?.message ?? 'Token inválido o expirado.';
-        setErrorMessage(message);
+      .catch((err: unknown) => {
+        setErrorMessage(getApiErrorMessage(err, 'Token inválido o expirado.'));
         setStatus('error');
       });
   }, [searchParams, setSession, navigate]);

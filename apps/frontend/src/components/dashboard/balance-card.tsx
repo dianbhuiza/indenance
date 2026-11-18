@@ -1,4 +1,4 @@
-import { useAccountsQuery } from '@/stores/accounts.store';
+import { useAccountsQuery, formatAmount } from '@indenance/core';
 import { Wallet } from 'lucide-react';
 
 export function BalanceCard() {
@@ -10,7 +10,7 @@ export function BalanceCard() {
       <div className="relative z-10">
         <p className="text-sm font-medium text-primary-200">Balance total</p>
         <p className="mt-1 font-display text-4xl tracking-tight">
-          ${totalBalance.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+          ${formatAmount(totalBalance)}
         </p>
       </div>
 
@@ -25,7 +25,7 @@ export function BalanceCard() {
                 <span className="text-sm text-primary-100">{account.name}</span>
               </div>
               <span className="text-sm font-medium tabular-nums">
-                ${account.balance.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                ${formatAmount(account.balance)}
                 <span className="ml-1 text-[10px] text-primary-300">{account.currency}</span>
               </span>
             </div>

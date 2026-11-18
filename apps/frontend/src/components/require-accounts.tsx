@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { Wallet } from 'lucide-react';
 import { Button } from '@/components/ui';
-import { useAccountsQuery } from '@/stores/accounts.store';
+import { useAccountsQuery } from '@indenance/core';
 import { CreateAccountDialog } from '@/components/create-account-dialog';
 
 interface RequireAccountsProps {

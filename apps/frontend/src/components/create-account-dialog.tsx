@@ -1,38 +1,9 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Dialog, Button, Input, Field } from '@/components/ui';
-import { useCreateAccountMutation } from '@/stores/accounts.store';
+import { useCreateAccountMutation, CURRENCIES, accountSchema, type AccountFormData } from '@indenance/core';
 import { toast } from 'sonner';
 import { Wallet, X } from 'lucide-react';
-
-const CURRENCIES = [
-  { code: 'MXN', label: 'Peso mexicano (MXN)' },
-  { code: 'USD', label: 'Dólar estadounidense (USD)' },
-  { code: 'EUR', label: 'Euro (EUR)' },
-  { code: 'COP', label: 'Peso colombiano (COP)' },
-  { code: 'ARS', label: 'Peso argentino (ARS)' },
-  { code: 'CLP', label: 'Peso chileno (CLP)' },
-  { code: 'PEN', label: 'Sol peruano (PEN)' },
-  { code: 'BRL', label: 'Real brasileño (BRL)' },
-  { code: 'GTQ', label: 'Quetzal guatemalteco (GTQ)' },
-  { code: 'HNL', label: 'Lempira hondureño (HNL)' },
-  { code: 'NIO', label: 'Córdoba nicaragüense (NIO)' },
-  { code: 'CRC', label: 'Colón costarricense (CRC)' },
-  { code: 'PAB', label: 'Balboa panameño (PAB)' },
-  { code: 'VES', label: 'Bolívar venezolano (VES)' },
-  { code: 'UYU', label: 'Peso uruguayo (UYU)' },
-  { code: 'PYG', label: 'Guaraní paraguayo (PYG)' },
-  { code: 'BOB', label: 'Boliviano (BOB)' },
-];
-
-const schema = z.object({
-  name: z.string().min(1, 'El nombre es requerido').max(120, 'Muy largo'),
-  currency: z.string().min(1, 'Selecciona una moneda'),
-  balance: z.coerce.number().int('Debe ser un número entero').optional(),
-});
-
-type FormData = z.infer<typeof schema>;
 
 interface CreateAccountDialogProps {
   open: boolean;
@@ -49,14 +20,14 @@ export function CreateAccountDialog({ open, onOpenChange }: CreateAccountDialogP
     watch,
     setValue,
     formState: { errors },
-  } = useForm<FormData>({
-    resolver: zodResolver(schema),
+  } = useForm<AccountFormData>({
+    resolver: zodResolver(accountSchema),
     defaultValues: { name: '', currency: '', balance: 0 },
   });
 
   const selectedCurrency = watch('currency');
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: AccountFormData) => {
     await createAccount.mutateAsync({
       name: data.name,
       currency: data.currency,

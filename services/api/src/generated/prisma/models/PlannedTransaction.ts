@@ -28,10 +28,14 @@ export type AggregatePlannedTransaction = {
 
 export type PlannedTransactionAvgAggregateOutputType = {
   amount: number | null
+  occurrences: number | null
+  completedOccurrences: number | null
 }
 
 export type PlannedTransactionSumAggregateOutputType = {
   amount: number | null
+  occurrences: number | null
+  completedOccurrences: number | null
 }
 
 export type PlannedTransactionMinAggregateOutputType = {
@@ -46,6 +50,10 @@ export type PlannedTransactionMinAggregateOutputType = {
   tenantId: string | null
   deletedAt: Date | null
   status: $Enums.PlannedTransactionStatus | null
+  requiresApproval: boolean | null
+  occurrences: number | null
+  completedOccurrences: number | null
+  loanId: string | null
 }
 
 export type PlannedTransactionMaxAggregateOutputType = {
@@ -60,6 +68,10 @@ export type PlannedTransactionMaxAggregateOutputType = {
   tenantId: string | null
   deletedAt: Date | null
   status: $Enums.PlannedTransactionStatus | null
+  requiresApproval: boolean | null
+  occurrences: number | null
+  completedOccurrences: number | null
+  loanId: string | null
 }
 
 export type PlannedTransactionCountAggregateOutputType = {
@@ -74,16 +86,24 @@ export type PlannedTransactionCountAggregateOutputType = {
   tenantId: number
   deletedAt: number
   status: number
+  requiresApproval: number
+  occurrences: number
+  completedOccurrences: number
+  loanId: number
   _all: number
 }
 
 
 export type PlannedTransactionAvgAggregateInputType = {
   amount?: true
+  occurrences?: true
+  completedOccurrences?: true
 }
 
 export type PlannedTransactionSumAggregateInputType = {
   amount?: true
+  occurrences?: true
+  completedOccurrences?: true
 }
 
 export type PlannedTransactionMinAggregateInputType = {
@@ -98,6 +118,10 @@ export type PlannedTransactionMinAggregateInputType = {
   tenantId?: true
   deletedAt?: true
   status?: true
+  requiresApproval?: true
+  occurrences?: true
+  completedOccurrences?: true
+  loanId?: true
 }
 
 export type PlannedTransactionMaxAggregateInputType = {
@@ -112,6 +136,10 @@ export type PlannedTransactionMaxAggregateInputType = {
   tenantId?: true
   deletedAt?: true
   status?: true
+  requiresApproval?: true
+  occurrences?: true
+  completedOccurrences?: true
+  loanId?: true
 }
 
 export type PlannedTransactionCountAggregateInputType = {
@@ -126,6 +154,10 @@ export type PlannedTransactionCountAggregateInputType = {
   tenantId?: true
   deletedAt?: true
   status?: true
+  requiresApproval?: true
+  occurrences?: true
+  completedOccurrences?: true
+  loanId?: true
   _all?: true
 }
 
@@ -227,6 +259,10 @@ export type PlannedTransactionGroupByOutputType = {
   tenantId: string
   deletedAt: Date | null
   status: $Enums.PlannedTransactionStatus
+  requiresApproval: boolean
+  occurrences: number | null
+  completedOccurrences: number
+  loanId: string | null
   _count: PlannedTransactionCountAggregateOutputType | null
   _avg: PlannedTransactionAvgAggregateOutputType | null
   _sum: PlannedTransactionSumAggregateOutputType | null
@@ -264,9 +300,14 @@ export type PlannedTransactionWhereInput = {
   tenantId?: Prisma.StringFilter<"PlannedTransaction"> | string
   deletedAt?: Prisma.DateTimeNullableFilter<"PlannedTransaction"> | Date | string | null
   status?: Prisma.EnumPlannedTransactionStatusFilter<"PlannedTransaction"> | $Enums.PlannedTransactionStatus
+  requiresApproval?: Prisma.BoolFilter<"PlannedTransaction"> | boolean
+  occurrences?: Prisma.IntNullableFilter<"PlannedTransaction"> | number | null
+  completedOccurrences?: Prisma.IntFilter<"PlannedTransaction"> | number
+  loanId?: Prisma.StringNullableFilter<"PlannedTransaction"> | string | null
   account?: Prisma.XOR<Prisma.AccountScalarRelationFilter, Prisma.AccountWhereInput>
   category?: Prisma.XOR<Prisma.CategoryNullableScalarRelationFilter, Prisma.CategoryWhereInput> | null
   Tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
+  loan?: Prisma.XOR<Prisma.LoanNullableScalarRelationFilter, Prisma.LoanWhereInput> | null
   alerts?: Prisma.PlannedTransactionAlertListRelationFilter
 }
 
@@ -282,14 +323,20 @@ export type PlannedTransactionOrderByWithRelationInput = {
   tenantId?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  requiresApproval?: Prisma.SortOrder
+  occurrences?: Prisma.SortOrderInput | Prisma.SortOrder
+  completedOccurrences?: Prisma.SortOrder
+  loanId?: Prisma.SortOrderInput | Prisma.SortOrder
   account?: Prisma.AccountOrderByWithRelationInput
   category?: Prisma.CategoryOrderByWithRelationInput
   Tenant?: Prisma.TenantOrderByWithRelationInput
+  loan?: Prisma.LoanOrderByWithRelationInput
   alerts?: Prisma.PlannedTransactionAlertOrderByRelationAggregateInput
 }
 
 export type PlannedTransactionWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  loanId?: string
   AND?: Prisma.PlannedTransactionWhereInput | Prisma.PlannedTransactionWhereInput[]
   OR?: Prisma.PlannedTransactionWhereInput[]
   NOT?: Prisma.PlannedTransactionWhereInput | Prisma.PlannedTransactionWhereInput[]
@@ -303,11 +350,15 @@ export type PlannedTransactionWhereUniqueInput = Prisma.AtLeast<{
   tenantId?: Prisma.StringFilter<"PlannedTransaction"> | string
   deletedAt?: Prisma.DateTimeNullableFilter<"PlannedTransaction"> | Date | string | null
   status?: Prisma.EnumPlannedTransactionStatusFilter<"PlannedTransaction"> | $Enums.PlannedTransactionStatus
+  requiresApproval?: Prisma.BoolFilter<"PlannedTransaction"> | boolean
+  occurrences?: Prisma.IntNullableFilter<"PlannedTransaction"> | number | null
+  completedOccurrences?: Prisma.IntFilter<"PlannedTransaction"> | number
   account?: Prisma.XOR<Prisma.AccountScalarRelationFilter, Prisma.AccountWhereInput>
   category?: Prisma.XOR<Prisma.CategoryNullableScalarRelationFilter, Prisma.CategoryWhereInput> | null
   Tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
+  loan?: Prisma.XOR<Prisma.LoanNullableScalarRelationFilter, Prisma.LoanWhereInput> | null
   alerts?: Prisma.PlannedTransactionAlertListRelationFilter
-}, "id">
+}, "id" | "loanId">
 
 export type PlannedTransactionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -321,6 +372,10 @@ export type PlannedTransactionOrderByWithAggregationInput = {
   tenantId?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  requiresApproval?: Prisma.SortOrder
+  occurrences?: Prisma.SortOrderInput | Prisma.SortOrder
+  completedOccurrences?: Prisma.SortOrder
+  loanId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.PlannedTransactionCountOrderByAggregateInput
   _avg?: Prisma.PlannedTransactionAvgOrderByAggregateInput
   _max?: Prisma.PlannedTransactionMaxOrderByAggregateInput
@@ -343,6 +398,10 @@ export type PlannedTransactionScalarWhereWithAggregatesInput = {
   tenantId?: Prisma.StringWithAggregatesFilter<"PlannedTransaction"> | string
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"PlannedTransaction"> | Date | string | null
   status?: Prisma.EnumPlannedTransactionStatusWithAggregatesFilter<"PlannedTransaction"> | $Enums.PlannedTransactionStatus
+  requiresApproval?: Prisma.BoolWithAggregatesFilter<"PlannedTransaction"> | boolean
+  occurrences?: Prisma.IntNullableWithAggregatesFilter<"PlannedTransaction"> | number | null
+  completedOccurrences?: Prisma.IntWithAggregatesFilter<"PlannedTransaction"> | number
+  loanId?: Prisma.StringNullableWithAggregatesFilter<"PlannedTransaction"> | string | null
 }
 
 export type PlannedTransactionCreateInput = {
@@ -354,9 +413,13 @@ export type PlannedTransactionCreateInput = {
   scheduledAt: Date | string
   deletedAt?: Date | string | null
   status?: $Enums.PlannedTransactionStatus
+  requiresApproval?: boolean
+  occurrences?: number | null
+  completedOccurrences?: number
   account: Prisma.AccountCreateNestedOneWithoutPlannedTransactionsInput
   category?: Prisma.CategoryCreateNestedOneWithoutPlannedTransactionsInput
   Tenant: Prisma.TenantCreateNestedOneWithoutPlannedTransactionsInput
+  loan?: Prisma.LoanCreateNestedOneWithoutPlannedTransactionInput
   alerts?: Prisma.PlannedTransactionAlertCreateNestedManyWithoutPlannedTransactionInput
 }
 
@@ -372,6 +435,10 @@ export type PlannedTransactionUncheckedCreateInput = {
   tenantId: string
   deletedAt?: Date | string | null
   status?: $Enums.PlannedTransactionStatus
+  requiresApproval?: boolean
+  occurrences?: number | null
+  completedOccurrences?: number
+  loanId?: string | null
   alerts?: Prisma.PlannedTransactionAlertUncheckedCreateNestedManyWithoutPlannedTransactionInput
 }
 
@@ -384,9 +451,13 @@ export type PlannedTransactionUpdateInput = {
   scheduledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumPlannedTransactionStatusFieldUpdateOperationsInput | $Enums.PlannedTransactionStatus
+  requiresApproval?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  occurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  completedOccurrences?: Prisma.IntFieldUpdateOperationsInput | number
   account?: Prisma.AccountUpdateOneRequiredWithoutPlannedTransactionsNestedInput
   category?: Prisma.CategoryUpdateOneWithoutPlannedTransactionsNestedInput
   Tenant?: Prisma.TenantUpdateOneRequiredWithoutPlannedTransactionsNestedInput
+  loan?: Prisma.LoanUpdateOneWithoutPlannedTransactionNestedInput
   alerts?: Prisma.PlannedTransactionAlertUpdateManyWithoutPlannedTransactionNestedInput
 }
 
@@ -402,6 +473,10 @@ export type PlannedTransactionUncheckedUpdateInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumPlannedTransactionStatusFieldUpdateOperationsInput | $Enums.PlannedTransactionStatus
+  requiresApproval?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  occurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  completedOccurrences?: Prisma.IntFieldUpdateOperationsInput | number
+  loanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   alerts?: Prisma.PlannedTransactionAlertUncheckedUpdateManyWithoutPlannedTransactionNestedInput
 }
 
@@ -417,6 +492,10 @@ export type PlannedTransactionCreateManyInput = {
   tenantId: string
   deletedAt?: Date | string | null
   status?: $Enums.PlannedTransactionStatus
+  requiresApproval?: boolean
+  occurrences?: number | null
+  completedOccurrences?: number
+  loanId?: string | null
 }
 
 export type PlannedTransactionUpdateManyMutationInput = {
@@ -428,6 +507,9 @@ export type PlannedTransactionUpdateManyMutationInput = {
   scheduledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumPlannedTransactionStatusFieldUpdateOperationsInput | $Enums.PlannedTransactionStatus
+  requiresApproval?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  occurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  completedOccurrences?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type PlannedTransactionUncheckedUpdateManyInput = {
@@ -442,6 +524,10 @@ export type PlannedTransactionUncheckedUpdateManyInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumPlannedTransactionStatusFieldUpdateOperationsInput | $Enums.PlannedTransactionStatus
+  requiresApproval?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  occurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  completedOccurrences?: Prisma.IntFieldUpdateOperationsInput | number
+  loanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type PlannedTransactionListRelationFilter = {
@@ -466,10 +552,16 @@ export type PlannedTransactionCountOrderByAggregateInput = {
   tenantId?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  requiresApproval?: Prisma.SortOrder
+  occurrences?: Prisma.SortOrder
+  completedOccurrences?: Prisma.SortOrder
+  loanId?: Prisma.SortOrder
 }
 
 export type PlannedTransactionAvgOrderByAggregateInput = {
   amount?: Prisma.SortOrder
+  occurrences?: Prisma.SortOrder
+  completedOccurrences?: Prisma.SortOrder
 }
 
 export type PlannedTransactionMaxOrderByAggregateInput = {
@@ -484,6 +576,10 @@ export type PlannedTransactionMaxOrderByAggregateInput = {
   tenantId?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  requiresApproval?: Prisma.SortOrder
+  occurrences?: Prisma.SortOrder
+  completedOccurrences?: Prisma.SortOrder
+  loanId?: Prisma.SortOrder
 }
 
 export type PlannedTransactionMinOrderByAggregateInput = {
@@ -498,15 +594,26 @@ export type PlannedTransactionMinOrderByAggregateInput = {
   tenantId?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  requiresApproval?: Prisma.SortOrder
+  occurrences?: Prisma.SortOrder
+  completedOccurrences?: Prisma.SortOrder
+  loanId?: Prisma.SortOrder
 }
 
 export type PlannedTransactionSumOrderByAggregateInput = {
   amount?: Prisma.SortOrder
+  occurrences?: Prisma.SortOrder
+  completedOccurrences?: Prisma.SortOrder
 }
 
 export type PlannedTransactionScalarRelationFilter = {
   is?: Prisma.PlannedTransactionWhereInput
   isNot?: Prisma.PlannedTransactionWhereInput
+}
+
+export type PlannedTransactionNullableScalarRelationFilter = {
+  is?: Prisma.PlannedTransactionWhereInput | null
+  isNot?: Prisma.PlannedTransactionWhereInput | null
 }
 
 export type PlannedTransactionCreateNestedManyWithoutTenantInput = {
@@ -653,6 +760,38 @@ export type PlannedTransactionUpdateOneRequiredWithoutAlertsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.PlannedTransactionUpdateToOneWithWhereWithoutAlertsInput, Prisma.PlannedTransactionUpdateWithoutAlertsInput>, Prisma.PlannedTransactionUncheckedUpdateWithoutAlertsInput>
 }
 
+export type PlannedTransactionCreateNestedOneWithoutLoanInput = {
+  create?: Prisma.XOR<Prisma.PlannedTransactionCreateWithoutLoanInput, Prisma.PlannedTransactionUncheckedCreateWithoutLoanInput>
+  connectOrCreate?: Prisma.PlannedTransactionCreateOrConnectWithoutLoanInput
+  connect?: Prisma.PlannedTransactionWhereUniqueInput
+}
+
+export type PlannedTransactionUncheckedCreateNestedOneWithoutLoanInput = {
+  create?: Prisma.XOR<Prisma.PlannedTransactionCreateWithoutLoanInput, Prisma.PlannedTransactionUncheckedCreateWithoutLoanInput>
+  connectOrCreate?: Prisma.PlannedTransactionCreateOrConnectWithoutLoanInput
+  connect?: Prisma.PlannedTransactionWhereUniqueInput
+}
+
+export type PlannedTransactionUpdateOneWithoutLoanNestedInput = {
+  create?: Prisma.XOR<Prisma.PlannedTransactionCreateWithoutLoanInput, Prisma.PlannedTransactionUncheckedCreateWithoutLoanInput>
+  connectOrCreate?: Prisma.PlannedTransactionCreateOrConnectWithoutLoanInput
+  upsert?: Prisma.PlannedTransactionUpsertWithoutLoanInput
+  disconnect?: Prisma.PlannedTransactionWhereInput | boolean
+  delete?: Prisma.PlannedTransactionWhereInput | boolean
+  connect?: Prisma.PlannedTransactionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PlannedTransactionUpdateToOneWithWhereWithoutLoanInput, Prisma.PlannedTransactionUpdateWithoutLoanInput>, Prisma.PlannedTransactionUncheckedUpdateWithoutLoanInput>
+}
+
+export type PlannedTransactionUncheckedUpdateOneWithoutLoanNestedInput = {
+  create?: Prisma.XOR<Prisma.PlannedTransactionCreateWithoutLoanInput, Prisma.PlannedTransactionUncheckedCreateWithoutLoanInput>
+  connectOrCreate?: Prisma.PlannedTransactionCreateOrConnectWithoutLoanInput
+  upsert?: Prisma.PlannedTransactionUpsertWithoutLoanInput
+  disconnect?: Prisma.PlannedTransactionWhereInput | boolean
+  delete?: Prisma.PlannedTransactionWhereInput | boolean
+  connect?: Prisma.PlannedTransactionWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PlannedTransactionUpdateToOneWithWhereWithoutLoanInput, Prisma.PlannedTransactionUpdateWithoutLoanInput>, Prisma.PlannedTransactionUncheckedUpdateWithoutLoanInput>
+}
+
 export type PlannedTransactionCreateWithoutTenantInput = {
   id?: string
   amount: number
@@ -662,8 +801,12 @@ export type PlannedTransactionCreateWithoutTenantInput = {
   scheduledAt: Date | string
   deletedAt?: Date | string | null
   status?: $Enums.PlannedTransactionStatus
+  requiresApproval?: boolean
+  occurrences?: number | null
+  completedOccurrences?: number
   account: Prisma.AccountCreateNestedOneWithoutPlannedTransactionsInput
   category?: Prisma.CategoryCreateNestedOneWithoutPlannedTransactionsInput
+  loan?: Prisma.LoanCreateNestedOneWithoutPlannedTransactionInput
   alerts?: Prisma.PlannedTransactionAlertCreateNestedManyWithoutPlannedTransactionInput
 }
 
@@ -678,6 +821,10 @@ export type PlannedTransactionUncheckedCreateWithoutTenantInput = {
   categoryId?: string | null
   deletedAt?: Date | string | null
   status?: $Enums.PlannedTransactionStatus
+  requiresApproval?: boolean
+  occurrences?: number | null
+  completedOccurrences?: number
+  loanId?: string | null
   alerts?: Prisma.PlannedTransactionAlertUncheckedCreateNestedManyWithoutPlannedTransactionInput
 }
 
@@ -722,6 +869,10 @@ export type PlannedTransactionScalarWhereInput = {
   tenantId?: Prisma.StringFilter<"PlannedTransaction"> | string
   deletedAt?: Prisma.DateTimeNullableFilter<"PlannedTransaction"> | Date | string | null
   status?: Prisma.EnumPlannedTransactionStatusFilter<"PlannedTransaction"> | $Enums.PlannedTransactionStatus
+  requiresApproval?: Prisma.BoolFilter<"PlannedTransaction"> | boolean
+  occurrences?: Prisma.IntNullableFilter<"PlannedTransaction"> | number | null
+  completedOccurrences?: Prisma.IntFilter<"PlannedTransaction"> | number
+  loanId?: Prisma.StringNullableFilter<"PlannedTransaction"> | string | null
 }
 
 export type PlannedTransactionCreateWithoutAccountInput = {
@@ -733,8 +884,12 @@ export type PlannedTransactionCreateWithoutAccountInput = {
   scheduledAt: Date | string
   deletedAt?: Date | string | null
   status?: $Enums.PlannedTransactionStatus
+  requiresApproval?: boolean
+  occurrences?: number | null
+  completedOccurrences?: number
   category?: Prisma.CategoryCreateNestedOneWithoutPlannedTransactionsInput
   Tenant: Prisma.TenantCreateNestedOneWithoutPlannedTransactionsInput
+  loan?: Prisma.LoanCreateNestedOneWithoutPlannedTransactionInput
   alerts?: Prisma.PlannedTransactionAlertCreateNestedManyWithoutPlannedTransactionInput
 }
 
@@ -749,6 +904,10 @@ export type PlannedTransactionUncheckedCreateWithoutAccountInput = {
   tenantId: string
   deletedAt?: Date | string | null
   status?: $Enums.PlannedTransactionStatus
+  requiresApproval?: boolean
+  occurrences?: number | null
+  completedOccurrences?: number
+  loanId?: string | null
   alerts?: Prisma.PlannedTransactionAlertUncheckedCreateNestedManyWithoutPlannedTransactionInput
 }
 
@@ -787,8 +946,12 @@ export type PlannedTransactionCreateWithoutCategoryInput = {
   scheduledAt: Date | string
   deletedAt?: Date | string | null
   status?: $Enums.PlannedTransactionStatus
+  requiresApproval?: boolean
+  occurrences?: number | null
+  completedOccurrences?: number
   account: Prisma.AccountCreateNestedOneWithoutPlannedTransactionsInput
   Tenant: Prisma.TenantCreateNestedOneWithoutPlannedTransactionsInput
+  loan?: Prisma.LoanCreateNestedOneWithoutPlannedTransactionInput
   alerts?: Prisma.PlannedTransactionAlertCreateNestedManyWithoutPlannedTransactionInput
 }
 
@@ -803,6 +966,10 @@ export type PlannedTransactionUncheckedCreateWithoutCategoryInput = {
   tenantId: string
   deletedAt?: Date | string | null
   status?: $Enums.PlannedTransactionStatus
+  requiresApproval?: boolean
+  occurrences?: number | null
+  completedOccurrences?: number
+  loanId?: string | null
   alerts?: Prisma.PlannedTransactionAlertUncheckedCreateNestedManyWithoutPlannedTransactionInput
 }
 
@@ -841,9 +1008,13 @@ export type PlannedTransactionCreateWithoutAlertsInput = {
   scheduledAt: Date | string
   deletedAt?: Date | string | null
   status?: $Enums.PlannedTransactionStatus
+  requiresApproval?: boolean
+  occurrences?: number | null
+  completedOccurrences?: number
   account: Prisma.AccountCreateNestedOneWithoutPlannedTransactionsInput
   category?: Prisma.CategoryCreateNestedOneWithoutPlannedTransactionsInput
   Tenant: Prisma.TenantCreateNestedOneWithoutPlannedTransactionsInput
+  loan?: Prisma.LoanCreateNestedOneWithoutPlannedTransactionInput
 }
 
 export type PlannedTransactionUncheckedCreateWithoutAlertsInput = {
@@ -858,6 +1029,10 @@ export type PlannedTransactionUncheckedCreateWithoutAlertsInput = {
   tenantId: string
   deletedAt?: Date | string | null
   status?: $Enums.PlannedTransactionStatus
+  requiresApproval?: boolean
+  occurrences?: number | null
+  completedOccurrences?: number
+  loanId?: string | null
 }
 
 export type PlannedTransactionCreateOrConnectWithoutAlertsInput = {
@@ -885,9 +1060,13 @@ export type PlannedTransactionUpdateWithoutAlertsInput = {
   scheduledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumPlannedTransactionStatusFieldUpdateOperationsInput | $Enums.PlannedTransactionStatus
+  requiresApproval?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  occurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  completedOccurrences?: Prisma.IntFieldUpdateOperationsInput | number
   account?: Prisma.AccountUpdateOneRequiredWithoutPlannedTransactionsNestedInput
   category?: Prisma.CategoryUpdateOneWithoutPlannedTransactionsNestedInput
   Tenant?: Prisma.TenantUpdateOneRequiredWithoutPlannedTransactionsNestedInput
+  loan?: Prisma.LoanUpdateOneWithoutPlannedTransactionNestedInput
 }
 
 export type PlannedTransactionUncheckedUpdateWithoutAlertsInput = {
@@ -902,6 +1081,98 @@ export type PlannedTransactionUncheckedUpdateWithoutAlertsInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumPlannedTransactionStatusFieldUpdateOperationsInput | $Enums.PlannedTransactionStatus
+  requiresApproval?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  occurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  completedOccurrences?: Prisma.IntFieldUpdateOperationsInput | number
+  loanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type PlannedTransactionCreateWithoutLoanInput = {
+  id?: string
+  amount: number
+  isRecurring?: boolean
+  interval?: $Enums.Interval | null
+  type: $Enums.TransactionType
+  scheduledAt: Date | string
+  deletedAt?: Date | string | null
+  status?: $Enums.PlannedTransactionStatus
+  requiresApproval?: boolean
+  occurrences?: number | null
+  completedOccurrences?: number
+  account: Prisma.AccountCreateNestedOneWithoutPlannedTransactionsInput
+  category?: Prisma.CategoryCreateNestedOneWithoutPlannedTransactionsInput
+  Tenant: Prisma.TenantCreateNestedOneWithoutPlannedTransactionsInput
+  alerts?: Prisma.PlannedTransactionAlertCreateNestedManyWithoutPlannedTransactionInput
+}
+
+export type PlannedTransactionUncheckedCreateWithoutLoanInput = {
+  id?: string
+  accountId: string
+  amount: number
+  isRecurring?: boolean
+  interval?: $Enums.Interval | null
+  type: $Enums.TransactionType
+  scheduledAt: Date | string
+  categoryId?: string | null
+  tenantId: string
+  deletedAt?: Date | string | null
+  status?: $Enums.PlannedTransactionStatus
+  requiresApproval?: boolean
+  occurrences?: number | null
+  completedOccurrences?: number
+  alerts?: Prisma.PlannedTransactionAlertUncheckedCreateNestedManyWithoutPlannedTransactionInput
+}
+
+export type PlannedTransactionCreateOrConnectWithoutLoanInput = {
+  where: Prisma.PlannedTransactionWhereUniqueInput
+  create: Prisma.XOR<Prisma.PlannedTransactionCreateWithoutLoanInput, Prisma.PlannedTransactionUncheckedCreateWithoutLoanInput>
+}
+
+export type PlannedTransactionUpsertWithoutLoanInput = {
+  update: Prisma.XOR<Prisma.PlannedTransactionUpdateWithoutLoanInput, Prisma.PlannedTransactionUncheckedUpdateWithoutLoanInput>
+  create: Prisma.XOR<Prisma.PlannedTransactionCreateWithoutLoanInput, Prisma.PlannedTransactionUncheckedCreateWithoutLoanInput>
+  where?: Prisma.PlannedTransactionWhereInput
+}
+
+export type PlannedTransactionUpdateToOneWithWhereWithoutLoanInput = {
+  where?: Prisma.PlannedTransactionWhereInput
+  data: Prisma.XOR<Prisma.PlannedTransactionUpdateWithoutLoanInput, Prisma.PlannedTransactionUncheckedUpdateWithoutLoanInput>
+}
+
+export type PlannedTransactionUpdateWithoutLoanInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  isRecurring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  interval?: Prisma.NullableEnumIntervalFieldUpdateOperationsInput | $Enums.Interval | null
+  type?: Prisma.EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+  scheduledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  status?: Prisma.EnumPlannedTransactionStatusFieldUpdateOperationsInput | $Enums.PlannedTransactionStatus
+  requiresApproval?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  occurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  completedOccurrences?: Prisma.IntFieldUpdateOperationsInput | number
+  account?: Prisma.AccountUpdateOneRequiredWithoutPlannedTransactionsNestedInput
+  category?: Prisma.CategoryUpdateOneWithoutPlannedTransactionsNestedInput
+  Tenant?: Prisma.TenantUpdateOneRequiredWithoutPlannedTransactionsNestedInput
+  alerts?: Prisma.PlannedTransactionAlertUpdateManyWithoutPlannedTransactionNestedInput
+}
+
+export type PlannedTransactionUncheckedUpdateWithoutLoanInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  accountId?: Prisma.StringFieldUpdateOperationsInput | string
+  amount?: Prisma.IntFieldUpdateOperationsInput | number
+  isRecurring?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  interval?: Prisma.NullableEnumIntervalFieldUpdateOperationsInput | $Enums.Interval | null
+  type?: Prisma.EnumTransactionTypeFieldUpdateOperationsInput | $Enums.TransactionType
+  scheduledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  status?: Prisma.EnumPlannedTransactionStatusFieldUpdateOperationsInput | $Enums.PlannedTransactionStatus
+  requiresApproval?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  occurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  completedOccurrences?: Prisma.IntFieldUpdateOperationsInput | number
+  alerts?: Prisma.PlannedTransactionAlertUncheckedUpdateManyWithoutPlannedTransactionNestedInput
 }
 
 export type PlannedTransactionCreateManyTenantInput = {
@@ -915,6 +1186,10 @@ export type PlannedTransactionCreateManyTenantInput = {
   categoryId?: string | null
   deletedAt?: Date | string | null
   status?: $Enums.PlannedTransactionStatus
+  requiresApproval?: boolean
+  occurrences?: number | null
+  completedOccurrences?: number
+  loanId?: string | null
 }
 
 export type PlannedTransactionUpdateWithoutTenantInput = {
@@ -926,8 +1201,12 @@ export type PlannedTransactionUpdateWithoutTenantInput = {
   scheduledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumPlannedTransactionStatusFieldUpdateOperationsInput | $Enums.PlannedTransactionStatus
+  requiresApproval?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  occurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  completedOccurrences?: Prisma.IntFieldUpdateOperationsInput | number
   account?: Prisma.AccountUpdateOneRequiredWithoutPlannedTransactionsNestedInput
   category?: Prisma.CategoryUpdateOneWithoutPlannedTransactionsNestedInput
+  loan?: Prisma.LoanUpdateOneWithoutPlannedTransactionNestedInput
   alerts?: Prisma.PlannedTransactionAlertUpdateManyWithoutPlannedTransactionNestedInput
 }
 
@@ -942,6 +1221,10 @@ export type PlannedTransactionUncheckedUpdateWithoutTenantInput = {
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumPlannedTransactionStatusFieldUpdateOperationsInput | $Enums.PlannedTransactionStatus
+  requiresApproval?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  occurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  completedOccurrences?: Prisma.IntFieldUpdateOperationsInput | number
+  loanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   alerts?: Prisma.PlannedTransactionAlertUncheckedUpdateManyWithoutPlannedTransactionNestedInput
 }
 
@@ -956,6 +1239,10 @@ export type PlannedTransactionUncheckedUpdateManyWithoutTenantInput = {
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumPlannedTransactionStatusFieldUpdateOperationsInput | $Enums.PlannedTransactionStatus
+  requiresApproval?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  occurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  completedOccurrences?: Prisma.IntFieldUpdateOperationsInput | number
+  loanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type PlannedTransactionCreateManyAccountInput = {
@@ -969,6 +1256,10 @@ export type PlannedTransactionCreateManyAccountInput = {
   tenantId: string
   deletedAt?: Date | string | null
   status?: $Enums.PlannedTransactionStatus
+  requiresApproval?: boolean
+  occurrences?: number | null
+  completedOccurrences?: number
+  loanId?: string | null
 }
 
 export type PlannedTransactionUpdateWithoutAccountInput = {
@@ -980,8 +1271,12 @@ export type PlannedTransactionUpdateWithoutAccountInput = {
   scheduledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumPlannedTransactionStatusFieldUpdateOperationsInput | $Enums.PlannedTransactionStatus
+  requiresApproval?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  occurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  completedOccurrences?: Prisma.IntFieldUpdateOperationsInput | number
   category?: Prisma.CategoryUpdateOneWithoutPlannedTransactionsNestedInput
   Tenant?: Prisma.TenantUpdateOneRequiredWithoutPlannedTransactionsNestedInput
+  loan?: Prisma.LoanUpdateOneWithoutPlannedTransactionNestedInput
   alerts?: Prisma.PlannedTransactionAlertUpdateManyWithoutPlannedTransactionNestedInput
 }
 
@@ -996,6 +1291,10 @@ export type PlannedTransactionUncheckedUpdateWithoutAccountInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumPlannedTransactionStatusFieldUpdateOperationsInput | $Enums.PlannedTransactionStatus
+  requiresApproval?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  occurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  completedOccurrences?: Prisma.IntFieldUpdateOperationsInput | number
+  loanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   alerts?: Prisma.PlannedTransactionAlertUncheckedUpdateManyWithoutPlannedTransactionNestedInput
 }
 
@@ -1010,6 +1309,10 @@ export type PlannedTransactionUncheckedUpdateManyWithoutAccountInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumPlannedTransactionStatusFieldUpdateOperationsInput | $Enums.PlannedTransactionStatus
+  requiresApproval?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  occurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  completedOccurrences?: Prisma.IntFieldUpdateOperationsInput | number
+  loanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type PlannedTransactionCreateManyCategoryInput = {
@@ -1023,6 +1326,10 @@ export type PlannedTransactionCreateManyCategoryInput = {
   tenantId: string
   deletedAt?: Date | string | null
   status?: $Enums.PlannedTransactionStatus
+  requiresApproval?: boolean
+  occurrences?: number | null
+  completedOccurrences?: number
+  loanId?: string | null
 }
 
 export type PlannedTransactionUpdateWithoutCategoryInput = {
@@ -1034,8 +1341,12 @@ export type PlannedTransactionUpdateWithoutCategoryInput = {
   scheduledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumPlannedTransactionStatusFieldUpdateOperationsInput | $Enums.PlannedTransactionStatus
+  requiresApproval?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  occurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  completedOccurrences?: Prisma.IntFieldUpdateOperationsInput | number
   account?: Prisma.AccountUpdateOneRequiredWithoutPlannedTransactionsNestedInput
   Tenant?: Prisma.TenantUpdateOneRequiredWithoutPlannedTransactionsNestedInput
+  loan?: Prisma.LoanUpdateOneWithoutPlannedTransactionNestedInput
   alerts?: Prisma.PlannedTransactionAlertUpdateManyWithoutPlannedTransactionNestedInput
 }
 
@@ -1050,6 +1361,10 @@ export type PlannedTransactionUncheckedUpdateWithoutCategoryInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumPlannedTransactionStatusFieldUpdateOperationsInput | $Enums.PlannedTransactionStatus
+  requiresApproval?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  occurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  completedOccurrences?: Prisma.IntFieldUpdateOperationsInput | number
+  loanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   alerts?: Prisma.PlannedTransactionAlertUncheckedUpdateManyWithoutPlannedTransactionNestedInput
 }
 
@@ -1064,6 +1379,10 @@ export type PlannedTransactionUncheckedUpdateManyWithoutCategoryInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumPlannedTransactionStatusFieldUpdateOperationsInput | $Enums.PlannedTransactionStatus
+  requiresApproval?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  occurrences?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  completedOccurrences?: Prisma.IntFieldUpdateOperationsInput | number
+  loanId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -1109,9 +1428,14 @@ export type PlannedTransactionSelect<ExtArgs extends runtime.Types.Extensions.In
   tenantId?: boolean
   deletedAt?: boolean
   status?: boolean
+  requiresApproval?: boolean
+  occurrences?: boolean
+  completedOccurrences?: boolean
+  loanId?: boolean
   account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
   category?: boolean | Prisma.PlannedTransaction$categoryArgs<ExtArgs>
   Tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  loan?: boolean | Prisma.PlannedTransaction$loanArgs<ExtArgs>
   alerts?: boolean | Prisma.PlannedTransaction$alertsArgs<ExtArgs>
   _count?: boolean | Prisma.PlannedTransactionCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["plannedTransaction"]>
@@ -1128,9 +1452,14 @@ export type PlannedTransactionSelectCreateManyAndReturn<ExtArgs extends runtime.
   tenantId?: boolean
   deletedAt?: boolean
   status?: boolean
+  requiresApproval?: boolean
+  occurrences?: boolean
+  completedOccurrences?: boolean
+  loanId?: boolean
   account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
   category?: boolean | Prisma.PlannedTransaction$categoryArgs<ExtArgs>
   Tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  loan?: boolean | Prisma.PlannedTransaction$loanArgs<ExtArgs>
 }, ExtArgs["result"]["plannedTransaction"]>
 
 export type PlannedTransactionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1145,9 +1474,14 @@ export type PlannedTransactionSelectUpdateManyAndReturn<ExtArgs extends runtime.
   tenantId?: boolean
   deletedAt?: boolean
   status?: boolean
+  requiresApproval?: boolean
+  occurrences?: boolean
+  completedOccurrences?: boolean
+  loanId?: boolean
   account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
   category?: boolean | Prisma.PlannedTransaction$categoryArgs<ExtArgs>
   Tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  loan?: boolean | Prisma.PlannedTransaction$loanArgs<ExtArgs>
 }, ExtArgs["result"]["plannedTransaction"]>
 
 export type PlannedTransactionSelectScalar = {
@@ -1162,13 +1496,18 @@ export type PlannedTransactionSelectScalar = {
   tenantId?: boolean
   deletedAt?: boolean
   status?: boolean
+  requiresApproval?: boolean
+  occurrences?: boolean
+  completedOccurrences?: boolean
+  loanId?: boolean
 }
 
-export type PlannedTransactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "accountId" | "amount" | "isRecurring" | "interval" | "type" | "scheduledAt" | "categoryId" | "tenantId" | "deletedAt" | "status", ExtArgs["result"]["plannedTransaction"]>
+export type PlannedTransactionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "accountId" | "amount" | "isRecurring" | "interval" | "type" | "scheduledAt" | "categoryId" | "tenantId" | "deletedAt" | "status" | "requiresApproval" | "occurrences" | "completedOccurrences" | "loanId", ExtArgs["result"]["plannedTransaction"]>
 export type PlannedTransactionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
   category?: boolean | Prisma.PlannedTransaction$categoryArgs<ExtArgs>
   Tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  loan?: boolean | Prisma.PlannedTransaction$loanArgs<ExtArgs>
   alerts?: boolean | Prisma.PlannedTransaction$alertsArgs<ExtArgs>
   _count?: boolean | Prisma.PlannedTransactionCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -1176,11 +1515,13 @@ export type PlannedTransactionIncludeCreateManyAndReturn<ExtArgs extends runtime
   account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
   category?: boolean | Prisma.PlannedTransaction$categoryArgs<ExtArgs>
   Tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  loan?: boolean | Prisma.PlannedTransaction$loanArgs<ExtArgs>
 }
 export type PlannedTransactionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   account?: boolean | Prisma.AccountDefaultArgs<ExtArgs>
   category?: boolean | Prisma.PlannedTransaction$categoryArgs<ExtArgs>
   Tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  loan?: boolean | Prisma.PlannedTransaction$loanArgs<ExtArgs>
 }
 
 export type $PlannedTransactionPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1189,6 +1530,7 @@ export type $PlannedTransactionPayload<ExtArgs extends runtime.Types.Extensions.
     account: Prisma.$AccountPayload<ExtArgs>
     category: Prisma.$CategoryPayload<ExtArgs> | null
     Tenant: Prisma.$TenantPayload<ExtArgs>
+    loan: Prisma.$LoanPayload<ExtArgs> | null
     alerts: Prisma.$PlannedTransactionAlertPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1203,6 +1545,10 @@ export type $PlannedTransactionPayload<ExtArgs extends runtime.Types.Extensions.
     tenantId: string
     deletedAt: Date | null
     status: $Enums.PlannedTransactionStatus
+    requiresApproval: boolean
+    occurrences: number | null
+    completedOccurrences: number
+    loanId: string | null
   }, ExtArgs["result"]["plannedTransaction"]>
   composites: {}
 }
@@ -1600,6 +1946,7 @@ export interface Prisma__PlannedTransactionClient<T, Null = never, ExtArgs exten
   account<T extends Prisma.AccountDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AccountDefaultArgs<ExtArgs>>): Prisma.Prisma__AccountClient<runtime.Types.Result.GetResult<Prisma.$AccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   category<T extends Prisma.PlannedTransaction$categoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PlannedTransaction$categoryArgs<ExtArgs>>): Prisma.Prisma__CategoryClient<runtime.Types.Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   Tenant<T extends Prisma.TenantDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TenantDefaultArgs<ExtArgs>>): Prisma.Prisma__TenantClient<runtime.Types.Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  loan<T extends Prisma.PlannedTransaction$loanArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PlannedTransaction$loanArgs<ExtArgs>>): Prisma.Prisma__LoanClient<runtime.Types.Result.GetResult<Prisma.$LoanPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   alerts<T extends Prisma.PlannedTransaction$alertsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PlannedTransaction$alertsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlannedTransactionAlertPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1641,6 +1988,10 @@ export interface PlannedTransactionFieldRefs {
   readonly tenantId: Prisma.FieldRef<"PlannedTransaction", 'String'>
   readonly deletedAt: Prisma.FieldRef<"PlannedTransaction", 'DateTime'>
   readonly status: Prisma.FieldRef<"PlannedTransaction", 'PlannedTransactionStatus'>
+  readonly requiresApproval: Prisma.FieldRef<"PlannedTransaction", 'Boolean'>
+  readonly occurrences: Prisma.FieldRef<"PlannedTransaction", 'Int'>
+  readonly completedOccurrences: Prisma.FieldRef<"PlannedTransaction", 'Int'>
+  readonly loanId: Prisma.FieldRef<"PlannedTransaction", 'String'>
 }
     
 
@@ -2058,6 +2409,25 @@ export type PlannedTransaction$categoryArgs<ExtArgs extends runtime.Types.Extens
    */
   include?: Prisma.CategoryInclude<ExtArgs> | null
   where?: Prisma.CategoryWhereInput
+}
+
+/**
+ * PlannedTransaction.loan
+ */
+export type PlannedTransaction$loanArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Loan
+   */
+  select?: Prisma.LoanSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Loan
+   */
+  omit?: Prisma.LoanOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LoanInclude<ExtArgs> | null
+  where?: Prisma.LoanWhereInput
 }
 
 /**

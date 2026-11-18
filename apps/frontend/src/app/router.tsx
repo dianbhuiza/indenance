@@ -5,6 +5,8 @@ import { RequireAccounts } from '@/components/require-accounts';
 import { LoginPage } from '@/routes/auth/login';
 import { RegisterPage } from '@/routes/auth/register';
 import { VerifyEmailPage } from '@/routes/auth/verify';
+import { ForgotPasswordPage } from '@/routes/auth/forgot-password';
+import { ResetPasswordPage } from '@/routes/auth/reset-password';
 import { DashboardPage } from '@/routes/dashboard';
 import { HomePage } from '@/routes';
 import { RootError } from '@/routes/error';
@@ -34,6 +36,20 @@ export const router = createBrowserRouter([
     element: <AuthLayout />,
     children: [
       { index: true, element: <VerifyEmailPage /> },
+    ],
+  },
+  {
+    path: '/auth/forgot-password',
+    element: <AuthLayout />,
+    children: [
+      { index: true, element: <ForgotPasswordPage /> },
+    ],
+  },
+  {
+    path: '/auth/reset-password',
+    element: <AuthLayout />,
+    children: [
+      { index: true, element: <ResetPasswordPage /> },
     ],
   },
   {

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { ThrottlerModule } from '@nestjs/throttler';
+
 import { AppConfig } from '../../config/app.config';
 import { PrismaModule } from '../prisma/prisma.module';
 import { PrismaService } from '../prisma/prisma.service';
@@ -22,7 +22,6 @@ import { GoogleStrategy } from './strategies/google.strategy';
     UsersModule,
     TenantsModule,
     PassportModule,
-    ThrottlerModule.forRoot([{ name: 'default', ttl: 60000, limit: 100 }]),
     JwtModule.registerAsync({
       global: true,
       inject: [AppConfig],

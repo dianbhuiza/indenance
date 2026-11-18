@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, ServiceUnavailableException } from '@nestjs/common';
 import { Public } from '../auth/guards/public.decorator';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -13,7 +13,10 @@ export class HealthController {
       await this.prisma.$queryRaw`SELECT 1`;
       return { status: 'ok', timestamp: new Date().toISOString() };
     } catch {
-      return { status: 'error', timestamp: new Date().toISOString() };
+      throw new ServiceUnavailableException({
+        status: 'error',
+        timestamp: new Date().toISOString(),
+      });
     }
   }
 }

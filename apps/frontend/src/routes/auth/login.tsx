@@ -2,17 +2,10 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Button, Input } from '@/components/ui';
 import { api } from '@/lib/api';
+import { getApiErrorMessage, loginSchema, type LoginFormData } from '@indenance/core';
 import { useAuthStore } from '@/stores/auth.store';
-
-const loginSchema = z.object({
-  email: z.string().email('Email inválido'),
-  password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
-});
-
-type LoginFormData = z.infer<typeof loginSchema>;
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -36,10 +29,7 @@ export function LoginPage() {
       setSession(session);
       navigate('/dashboard');
     } catch (err: unknown) {
-      const message =
-        (err as { response?: { data?: { message?: string } } })?.response?.data
-          ?.message ?? 'Error al iniciar sesión';
-      setServerError(message);
+      setServerError(getApiErrorMessage(err, 'Error al iniciar sesión'));
     }
   };
 
@@ -76,6 +66,14 @@ export function LoginPage() {
           error={errors.password?.message}
           {...register('password')}
         />
+        <div className="text-right">
+          <Link
+            to="/auth/forgot-password"
+            className="text-sm text-primary-600 hover:text-primary-500"
+          >
+            ¿Olvidaste tu contraseña?
+          </Link>
+        </div>
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? 'Entrando...' : 'Entrar'}
         </Button>

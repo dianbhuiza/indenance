@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { Plus, ArrowRightLeft, ShoppingCart, PiggyBank, CalendarClock } from 'lucide-react';
+import { Plus, ArrowRightLeft, ShoppingCart, PiggyBank, CalendarClock, HandCoins } from 'lucide-react';
 import clsx from 'clsx';
 
 interface FabAction {
@@ -12,6 +12,7 @@ interface FabAction {
 
 const actions: FabAction[] = [
   { id: 'transaction', label: 'Transacción', icon: ArrowRightLeft, color: 'text-primary-700 dark:text-primary-300', bgColor: 'bg-primary-100 dark:bg-primary-900/40' },
+  { id: 'loan', label: 'Préstamo', icon: HandCoins, color: 'text-info-700 dark:text-info-300', bgColor: 'bg-info-100 dark:bg-info-900/40' },
   { id: 'shopping', label: 'Lista de compra', icon: ShoppingCart, color: 'text-accent-700 dark:text-accent-300', bgColor: 'bg-accent-100 dark:bg-accent-900/40' },
   { id: 'budget', label: 'Presupuesto', icon: PiggyBank, color: 'text-violet-700 dark:text-violet-300', bgColor: 'bg-violet-100 dark:bg-violet-900/40' },
   { id: 'planned', label: 'Transacción planeada', icon: CalendarClock, color: 'text-amber-700 dark:text-amber-300', bgColor: 'bg-amber-100 dark:bg-amber-900/40' },

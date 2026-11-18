@@ -172,6 +172,7 @@ export type CategoryWhereInput = {
   plannedTransactions?: Prisma.PlannedTransactionListRelationFilter
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertListRelationFilter
   shoppingListItems?: Prisma.ShoppingListItemListRelationFilter
+  loans?: Prisma.LoanListRelationFilter
 }
 
 export type CategoryOrderByWithRelationInput = {
@@ -184,6 +185,7 @@ export type CategoryOrderByWithRelationInput = {
   plannedTransactions?: Prisma.PlannedTransactionOrderByRelationAggregateInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertOrderByRelationAggregateInput
   shoppingListItems?: Prisma.ShoppingListItemOrderByRelationAggregateInput
+  loans?: Prisma.LoanOrderByRelationAggregateInput
 }
 
 export type CategoryWhereUniqueInput = Prisma.AtLeast<{
@@ -199,6 +201,7 @@ export type CategoryWhereUniqueInput = Prisma.AtLeast<{
   plannedTransactions?: Prisma.PlannedTransactionListRelationFilter
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertListRelationFilter
   shoppingListItems?: Prisma.ShoppingListItemListRelationFilter
+  loans?: Prisma.LoanListRelationFilter
 }, "id">
 
 export type CategoryOrderByWithAggregationInput = {
@@ -228,6 +231,7 @@ export type CategoryCreateInput = {
   plannedTransactions?: Prisma.PlannedTransactionCreateNestedManyWithoutCategoryInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertCreateNestedManyWithoutCategoryInput
   shoppingListItems?: Prisma.ShoppingListItemCreateNestedManyWithoutCategoryInput
+  loans?: Prisma.LoanCreateNestedManyWithoutCategoryInput
 }
 
 export type CategoryUncheckedCreateInput = {
@@ -239,6 +243,7 @@ export type CategoryUncheckedCreateInput = {
   plannedTransactions?: Prisma.PlannedTransactionUncheckedCreateNestedManyWithoutCategoryInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUncheckedCreateNestedManyWithoutCategoryInput
   shoppingListItems?: Prisma.ShoppingListItemUncheckedCreateNestedManyWithoutCategoryInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutCategoryInput
 }
 
 export type CategoryUpdateInput = {
@@ -250,6 +255,7 @@ export type CategoryUpdateInput = {
   plannedTransactions?: Prisma.PlannedTransactionUpdateManyWithoutCategoryNestedInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUpdateManyWithoutCategoryNestedInput
   shoppingListItems?: Prisma.ShoppingListItemUpdateManyWithoutCategoryNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutCategoryNestedInput
 }
 
 export type CategoryUncheckedUpdateInput = {
@@ -261,6 +267,7 @@ export type CategoryUncheckedUpdateInput = {
   plannedTransactions?: Prisma.PlannedTransactionUncheckedUpdateManyWithoutCategoryNestedInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUncheckedUpdateManyWithoutCategoryNestedInput
   shoppingListItems?: Prisma.ShoppingListItemUncheckedUpdateManyWithoutCategoryNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutCategoryNestedInput
 }
 
 export type CategoryCreateManyInput = {
@@ -435,6 +442,22 @@ export type CategoryUpdateOneWithoutShoppingListItemsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.CategoryUpdateToOneWithWhereWithoutShoppingListItemsInput, Prisma.CategoryUpdateWithoutShoppingListItemsInput>, Prisma.CategoryUncheckedUpdateWithoutShoppingListItemsInput>
 }
 
+export type CategoryCreateNestedOneWithoutLoansInput = {
+  create?: Prisma.XOR<Prisma.CategoryCreateWithoutLoansInput, Prisma.CategoryUncheckedCreateWithoutLoansInput>
+  connectOrCreate?: Prisma.CategoryCreateOrConnectWithoutLoansInput
+  connect?: Prisma.CategoryWhereUniqueInput
+}
+
+export type CategoryUpdateOneWithoutLoansNestedInput = {
+  create?: Prisma.XOR<Prisma.CategoryCreateWithoutLoansInput, Prisma.CategoryUncheckedCreateWithoutLoansInput>
+  connectOrCreate?: Prisma.CategoryCreateOrConnectWithoutLoansInput
+  upsert?: Prisma.CategoryUpsertWithoutLoansInput
+  disconnect?: Prisma.CategoryWhereInput | boolean
+  delete?: Prisma.CategoryWhereInput | boolean
+  connect?: Prisma.CategoryWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CategoryUpdateToOneWithWhereWithoutLoansInput, Prisma.CategoryUpdateWithoutLoansInput>, Prisma.CategoryUncheckedUpdateWithoutLoansInput>
+}
+
 export type CategoryCreateWithoutTenantInput = {
   id?: string
   name: string
@@ -443,6 +466,7 @@ export type CategoryCreateWithoutTenantInput = {
   plannedTransactions?: Prisma.PlannedTransactionCreateNestedManyWithoutCategoryInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertCreateNestedManyWithoutCategoryInput
   shoppingListItems?: Prisma.ShoppingListItemCreateNestedManyWithoutCategoryInput
+  loans?: Prisma.LoanCreateNestedManyWithoutCategoryInput
 }
 
 export type CategoryUncheckedCreateWithoutTenantInput = {
@@ -453,6 +477,7 @@ export type CategoryUncheckedCreateWithoutTenantInput = {
   plannedTransactions?: Prisma.PlannedTransactionUncheckedCreateNestedManyWithoutCategoryInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUncheckedCreateNestedManyWithoutCategoryInput
   shoppingListItems?: Prisma.ShoppingListItemUncheckedCreateNestedManyWithoutCategoryInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutCategoryInput
 }
 
 export type CategoryCreateOrConnectWithoutTenantInput = {
@@ -498,6 +523,7 @@ export type CategoryCreateWithoutTransactionsInput = {
   plannedTransactions?: Prisma.PlannedTransactionCreateNestedManyWithoutCategoryInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertCreateNestedManyWithoutCategoryInput
   shoppingListItems?: Prisma.ShoppingListItemCreateNestedManyWithoutCategoryInput
+  loans?: Prisma.LoanCreateNestedManyWithoutCategoryInput
 }
 
 export type CategoryUncheckedCreateWithoutTransactionsInput = {
@@ -508,6 +534,7 @@ export type CategoryUncheckedCreateWithoutTransactionsInput = {
   plannedTransactions?: Prisma.PlannedTransactionUncheckedCreateNestedManyWithoutCategoryInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUncheckedCreateNestedManyWithoutCategoryInput
   shoppingListItems?: Prisma.ShoppingListItemUncheckedCreateNestedManyWithoutCategoryInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutCategoryInput
 }
 
 export type CategoryCreateOrConnectWithoutTransactionsInput = {
@@ -534,6 +561,7 @@ export type CategoryUpdateWithoutTransactionsInput = {
   plannedTransactions?: Prisma.PlannedTransactionUpdateManyWithoutCategoryNestedInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUpdateManyWithoutCategoryNestedInput
   shoppingListItems?: Prisma.ShoppingListItemUpdateManyWithoutCategoryNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutCategoryNestedInput
 }
 
 export type CategoryUncheckedUpdateWithoutTransactionsInput = {
@@ -544,6 +572,7 @@ export type CategoryUncheckedUpdateWithoutTransactionsInput = {
   plannedTransactions?: Prisma.PlannedTransactionUncheckedUpdateManyWithoutCategoryNestedInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUncheckedUpdateManyWithoutCategoryNestedInput
   shoppingListItems?: Prisma.ShoppingListItemUncheckedUpdateManyWithoutCategoryNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutCategoryNestedInput
 }
 
 export type CategoryCreateWithoutBudgetsInput = {
@@ -554,6 +583,7 @@ export type CategoryCreateWithoutBudgetsInput = {
   plannedTransactions?: Prisma.PlannedTransactionCreateNestedManyWithoutCategoryInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertCreateNestedManyWithoutCategoryInput
   shoppingListItems?: Prisma.ShoppingListItemCreateNestedManyWithoutCategoryInput
+  loans?: Prisma.LoanCreateNestedManyWithoutCategoryInput
 }
 
 export type CategoryUncheckedCreateWithoutBudgetsInput = {
@@ -564,6 +594,7 @@ export type CategoryUncheckedCreateWithoutBudgetsInput = {
   plannedTransactions?: Prisma.PlannedTransactionUncheckedCreateNestedManyWithoutCategoryInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUncheckedCreateNestedManyWithoutCategoryInput
   shoppingListItems?: Prisma.ShoppingListItemUncheckedCreateNestedManyWithoutCategoryInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutCategoryInput
 }
 
 export type CategoryCreateOrConnectWithoutBudgetsInput = {
@@ -590,6 +621,7 @@ export type CategoryUpdateWithoutBudgetsInput = {
   plannedTransactions?: Prisma.PlannedTransactionUpdateManyWithoutCategoryNestedInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUpdateManyWithoutCategoryNestedInput
   shoppingListItems?: Prisma.ShoppingListItemUpdateManyWithoutCategoryNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutCategoryNestedInput
 }
 
 export type CategoryUncheckedUpdateWithoutBudgetsInput = {
@@ -600,6 +632,7 @@ export type CategoryUncheckedUpdateWithoutBudgetsInput = {
   plannedTransactions?: Prisma.PlannedTransactionUncheckedUpdateManyWithoutCategoryNestedInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUncheckedUpdateManyWithoutCategoryNestedInput
   shoppingListItems?: Prisma.ShoppingListItemUncheckedUpdateManyWithoutCategoryNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutCategoryNestedInput
 }
 
 export type CategoryCreateWithoutPlannedTransactionsInput = {
@@ -610,6 +643,7 @@ export type CategoryCreateWithoutPlannedTransactionsInput = {
   budgets?: Prisma.BudgetCreateNestedManyWithoutCategoryInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertCreateNestedManyWithoutCategoryInput
   shoppingListItems?: Prisma.ShoppingListItemCreateNestedManyWithoutCategoryInput
+  loans?: Prisma.LoanCreateNestedManyWithoutCategoryInput
 }
 
 export type CategoryUncheckedCreateWithoutPlannedTransactionsInput = {
@@ -620,6 +654,7 @@ export type CategoryUncheckedCreateWithoutPlannedTransactionsInput = {
   budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutCategoryInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUncheckedCreateNestedManyWithoutCategoryInput
   shoppingListItems?: Prisma.ShoppingListItemUncheckedCreateNestedManyWithoutCategoryInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutCategoryInput
 }
 
 export type CategoryCreateOrConnectWithoutPlannedTransactionsInput = {
@@ -646,6 +681,7 @@ export type CategoryUpdateWithoutPlannedTransactionsInput = {
   budgets?: Prisma.BudgetUpdateManyWithoutCategoryNestedInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUpdateManyWithoutCategoryNestedInput
   shoppingListItems?: Prisma.ShoppingListItemUpdateManyWithoutCategoryNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutCategoryNestedInput
 }
 
 export type CategoryUncheckedUpdateWithoutPlannedTransactionsInput = {
@@ -656,6 +692,7 @@ export type CategoryUncheckedUpdateWithoutPlannedTransactionsInput = {
   budgets?: Prisma.BudgetUncheckedUpdateManyWithoutCategoryNestedInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUncheckedUpdateManyWithoutCategoryNestedInput
   shoppingListItems?: Prisma.ShoppingListItemUncheckedUpdateManyWithoutCategoryNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutCategoryNestedInput
 }
 
 export type CategoryCreateWithoutPlannedTransactionAlertsInput = {
@@ -666,6 +703,7 @@ export type CategoryCreateWithoutPlannedTransactionAlertsInput = {
   budgets?: Prisma.BudgetCreateNestedManyWithoutCategoryInput
   plannedTransactions?: Prisma.PlannedTransactionCreateNestedManyWithoutCategoryInput
   shoppingListItems?: Prisma.ShoppingListItemCreateNestedManyWithoutCategoryInput
+  loans?: Prisma.LoanCreateNestedManyWithoutCategoryInput
 }
 
 export type CategoryUncheckedCreateWithoutPlannedTransactionAlertsInput = {
@@ -676,6 +714,7 @@ export type CategoryUncheckedCreateWithoutPlannedTransactionAlertsInput = {
   budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutCategoryInput
   plannedTransactions?: Prisma.PlannedTransactionUncheckedCreateNestedManyWithoutCategoryInput
   shoppingListItems?: Prisma.ShoppingListItemUncheckedCreateNestedManyWithoutCategoryInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutCategoryInput
 }
 
 export type CategoryCreateOrConnectWithoutPlannedTransactionAlertsInput = {
@@ -702,6 +741,7 @@ export type CategoryUpdateWithoutPlannedTransactionAlertsInput = {
   budgets?: Prisma.BudgetUpdateManyWithoutCategoryNestedInput
   plannedTransactions?: Prisma.PlannedTransactionUpdateManyWithoutCategoryNestedInput
   shoppingListItems?: Prisma.ShoppingListItemUpdateManyWithoutCategoryNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutCategoryNestedInput
 }
 
 export type CategoryUncheckedUpdateWithoutPlannedTransactionAlertsInput = {
@@ -712,6 +752,7 @@ export type CategoryUncheckedUpdateWithoutPlannedTransactionAlertsInput = {
   budgets?: Prisma.BudgetUncheckedUpdateManyWithoutCategoryNestedInput
   plannedTransactions?: Prisma.PlannedTransactionUncheckedUpdateManyWithoutCategoryNestedInput
   shoppingListItems?: Prisma.ShoppingListItemUncheckedUpdateManyWithoutCategoryNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutCategoryNestedInput
 }
 
 export type CategoryCreateWithoutShoppingListItemsInput = {
@@ -722,6 +763,7 @@ export type CategoryCreateWithoutShoppingListItemsInput = {
   budgets?: Prisma.BudgetCreateNestedManyWithoutCategoryInput
   plannedTransactions?: Prisma.PlannedTransactionCreateNestedManyWithoutCategoryInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertCreateNestedManyWithoutCategoryInput
+  loans?: Prisma.LoanCreateNestedManyWithoutCategoryInput
 }
 
 export type CategoryUncheckedCreateWithoutShoppingListItemsInput = {
@@ -732,6 +774,7 @@ export type CategoryUncheckedCreateWithoutShoppingListItemsInput = {
   budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutCategoryInput
   plannedTransactions?: Prisma.PlannedTransactionUncheckedCreateNestedManyWithoutCategoryInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUncheckedCreateNestedManyWithoutCategoryInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutCategoryInput
 }
 
 export type CategoryCreateOrConnectWithoutShoppingListItemsInput = {
@@ -758,6 +801,7 @@ export type CategoryUpdateWithoutShoppingListItemsInput = {
   budgets?: Prisma.BudgetUpdateManyWithoutCategoryNestedInput
   plannedTransactions?: Prisma.PlannedTransactionUpdateManyWithoutCategoryNestedInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUpdateManyWithoutCategoryNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutCategoryNestedInput
 }
 
 export type CategoryUncheckedUpdateWithoutShoppingListItemsInput = {
@@ -768,6 +812,67 @@ export type CategoryUncheckedUpdateWithoutShoppingListItemsInput = {
   budgets?: Prisma.BudgetUncheckedUpdateManyWithoutCategoryNestedInput
   plannedTransactions?: Prisma.PlannedTransactionUncheckedUpdateManyWithoutCategoryNestedInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUncheckedUpdateManyWithoutCategoryNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutCategoryNestedInput
+}
+
+export type CategoryCreateWithoutLoansInput = {
+  id?: string
+  name: string
+  tenant: Prisma.TenantCreateNestedOneWithoutCategoriesInput
+  transactions?: Prisma.TransactionCreateNestedManyWithoutCategoryInput
+  budgets?: Prisma.BudgetCreateNestedManyWithoutCategoryInput
+  plannedTransactions?: Prisma.PlannedTransactionCreateNestedManyWithoutCategoryInput
+  plannedTransactionAlerts?: Prisma.PlannedTransactionAlertCreateNestedManyWithoutCategoryInput
+  shoppingListItems?: Prisma.ShoppingListItemCreateNestedManyWithoutCategoryInput
+}
+
+export type CategoryUncheckedCreateWithoutLoansInput = {
+  id?: string
+  name: string
+  tenantId: string
+  transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutCategoryInput
+  budgets?: Prisma.BudgetUncheckedCreateNestedManyWithoutCategoryInput
+  plannedTransactions?: Prisma.PlannedTransactionUncheckedCreateNestedManyWithoutCategoryInput
+  plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUncheckedCreateNestedManyWithoutCategoryInput
+  shoppingListItems?: Prisma.ShoppingListItemUncheckedCreateNestedManyWithoutCategoryInput
+}
+
+export type CategoryCreateOrConnectWithoutLoansInput = {
+  where: Prisma.CategoryWhereUniqueInput
+  create: Prisma.XOR<Prisma.CategoryCreateWithoutLoansInput, Prisma.CategoryUncheckedCreateWithoutLoansInput>
+}
+
+export type CategoryUpsertWithoutLoansInput = {
+  update: Prisma.XOR<Prisma.CategoryUpdateWithoutLoansInput, Prisma.CategoryUncheckedUpdateWithoutLoansInput>
+  create: Prisma.XOR<Prisma.CategoryCreateWithoutLoansInput, Prisma.CategoryUncheckedCreateWithoutLoansInput>
+  where?: Prisma.CategoryWhereInput
+}
+
+export type CategoryUpdateToOneWithWhereWithoutLoansInput = {
+  where?: Prisma.CategoryWhereInput
+  data: Prisma.XOR<Prisma.CategoryUpdateWithoutLoansInput, Prisma.CategoryUncheckedUpdateWithoutLoansInput>
+}
+
+export type CategoryUpdateWithoutLoansInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutCategoriesNestedInput
+  transactions?: Prisma.TransactionUpdateManyWithoutCategoryNestedInput
+  budgets?: Prisma.BudgetUpdateManyWithoutCategoryNestedInput
+  plannedTransactions?: Prisma.PlannedTransactionUpdateManyWithoutCategoryNestedInput
+  plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUpdateManyWithoutCategoryNestedInput
+  shoppingListItems?: Prisma.ShoppingListItemUpdateManyWithoutCategoryNestedInput
+}
+
+export type CategoryUncheckedUpdateWithoutLoansInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  transactions?: Prisma.TransactionUncheckedUpdateManyWithoutCategoryNestedInput
+  budgets?: Prisma.BudgetUncheckedUpdateManyWithoutCategoryNestedInput
+  plannedTransactions?: Prisma.PlannedTransactionUncheckedUpdateManyWithoutCategoryNestedInput
+  plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUncheckedUpdateManyWithoutCategoryNestedInput
+  shoppingListItems?: Prisma.ShoppingListItemUncheckedUpdateManyWithoutCategoryNestedInput
 }
 
 export type CategoryCreateManyTenantInput = {
@@ -783,6 +888,7 @@ export type CategoryUpdateWithoutTenantInput = {
   plannedTransactions?: Prisma.PlannedTransactionUpdateManyWithoutCategoryNestedInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUpdateManyWithoutCategoryNestedInput
   shoppingListItems?: Prisma.ShoppingListItemUpdateManyWithoutCategoryNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutCategoryNestedInput
 }
 
 export type CategoryUncheckedUpdateWithoutTenantInput = {
@@ -793,6 +899,7 @@ export type CategoryUncheckedUpdateWithoutTenantInput = {
   plannedTransactions?: Prisma.PlannedTransactionUncheckedUpdateManyWithoutCategoryNestedInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUncheckedUpdateManyWithoutCategoryNestedInput
   shoppingListItems?: Prisma.ShoppingListItemUncheckedUpdateManyWithoutCategoryNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutCategoryNestedInput
 }
 
 export type CategoryUncheckedUpdateManyWithoutTenantInput = {
@@ -811,6 +918,7 @@ export type CategoryCountOutputType = {
   plannedTransactions: number
   plannedTransactionAlerts: number
   shoppingListItems: number
+  loans: number
 }
 
 export type CategoryCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -819,6 +927,7 @@ export type CategoryCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensio
   plannedTransactions?: boolean | CategoryCountOutputTypeCountPlannedTransactionsArgs
   plannedTransactionAlerts?: boolean | CategoryCountOutputTypeCountPlannedTransactionAlertsArgs
   shoppingListItems?: boolean | CategoryCountOutputTypeCountShoppingListItemsArgs
+  loans?: boolean | CategoryCountOutputTypeCountLoansArgs
 }
 
 /**
@@ -866,6 +975,13 @@ export type CategoryCountOutputTypeCountShoppingListItemsArgs<ExtArgs extends ru
   where?: Prisma.ShoppingListItemWhereInput
 }
 
+/**
+ * CategoryCountOutputType without action
+ */
+export type CategoryCountOutputTypeCountLoansArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LoanWhereInput
+}
+
 
 export type CategorySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -877,6 +993,7 @@ export type CategorySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   plannedTransactions?: boolean | Prisma.Category$plannedTransactionsArgs<ExtArgs>
   plannedTransactionAlerts?: boolean | Prisma.Category$plannedTransactionAlertsArgs<ExtArgs>
   shoppingListItems?: boolean | Prisma.Category$shoppingListItemsArgs<ExtArgs>
+  loans?: boolean | Prisma.Category$loansArgs<ExtArgs>
   _count?: boolean | Prisma.CategoryCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["category"]>
 
@@ -908,6 +1025,7 @@ export type CategoryInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   plannedTransactions?: boolean | Prisma.Category$plannedTransactionsArgs<ExtArgs>
   plannedTransactionAlerts?: boolean | Prisma.Category$plannedTransactionAlertsArgs<ExtArgs>
   shoppingListItems?: boolean | Prisma.Category$shoppingListItemsArgs<ExtArgs>
+  loans?: boolean | Prisma.Category$loansArgs<ExtArgs>
   _count?: boolean | Prisma.CategoryCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type CategoryIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -926,6 +1044,7 @@ export type $CategoryPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     plannedTransactions: Prisma.$PlannedTransactionPayload<ExtArgs>[]
     plannedTransactionAlerts: Prisma.$PlannedTransactionAlertPayload<ExtArgs>[]
     shoppingListItems: Prisma.$ShoppingListItemPayload<ExtArgs>[]
+    loans: Prisma.$LoanPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1331,6 +1450,7 @@ export interface Prisma__CategoryClient<T, Null = never, ExtArgs extends runtime
   plannedTransactions<T extends Prisma.Category$plannedTransactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Category$plannedTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlannedTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   plannedTransactionAlerts<T extends Prisma.Category$plannedTransactionAlertsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Category$plannedTransactionAlertsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlannedTransactionAlertPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   shoppingListItems<T extends Prisma.Category$shoppingListItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Category$shoppingListItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ShoppingListItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  loans<T extends Prisma.Category$loansArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Category$loansArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LoanPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1881,6 +2001,30 @@ export type Category$shoppingListItemsArgs<ExtArgs extends runtime.Types.Extensi
   take?: number
   skip?: number
   distinct?: Prisma.ShoppingListItemScalarFieldEnum | Prisma.ShoppingListItemScalarFieldEnum[]
+}
+
+/**
+ * Category.loans
+ */
+export type Category$loansArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Loan
+   */
+  select?: Prisma.LoanSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Loan
+   */
+  omit?: Prisma.LoanOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LoanInclude<ExtArgs> | null
+  where?: Prisma.LoanWhereInput
+  orderBy?: Prisma.LoanOrderByWithRelationInput | Prisma.LoanOrderByWithRelationInput[]
+  cursor?: Prisma.LoanWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LoanScalarFieldEnum | Prisma.LoanScalarFieldEnum[]
 }
 
 /**

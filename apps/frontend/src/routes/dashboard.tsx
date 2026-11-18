@@ -6,10 +6,10 @@ import { CategoryBreakdown } from '@/components/dashboard/category-breakdown';
 import { RecentTransactions } from '@/components/dashboard/recent-transactions';
 import { BudgetProgress } from '@/components/dashboard/budget-progress';
 import { FloatingActionButton } from '@/components/fab/floating-action-button';
-import { useTransactionsQuery } from '@/hooks/use-transactions';
-import { useBudgetsQuery } from '@/hooks/use-budgets';
+import { useTransactionsQuery, useBudgetsQuery, formatAmount } from '@indenance/core';
 import {
   NewTransactionModal,
+  NewLoanModal,
   NewShoppingListModal,
   NewBudgetModal,
   NewPlannedTransactionModal,
@@ -51,7 +51,7 @@ export function DashboardPage() {
             <p className="text-xs font-medium text-text-muted">Ingresos</p>
           </div>
           <p className="mt-2 font-display text-xl text-text">
-            ${income.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+            ${formatAmount(income)}
           </p>
           <p className="mt-0.5 text-[10px] font-medium text-text-muted">este mes</p>
         </div>
@@ -63,7 +63,7 @@ export function DashboardPage() {
             <p className="text-xs font-medium text-text-muted">Gastos</p>
           </div>
           <p className="mt-2 font-display text-xl text-text">
-            ${expenses.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+            ${formatAmount(expenses)}
           </p>
           <p className="mt-0.5 text-[10px] font-medium text-text-muted">este mes</p>
         </div>
@@ -91,6 +91,10 @@ export function DashboardPage() {
       {/* Modals */}
       <NewTransactionModal
         open={activeModal === 'transaction'}
+        onOpenChange={handleModalChange}
+      />
+      <NewLoanModal
+        open={activeModal === 'loan'}
         onOpenChange={handleModalChange}
       />
       <NewShoppingListModal

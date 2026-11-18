@@ -1,6 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Profile, Strategy, StrategyOptions } from 'passport-google-oauth20';
+import type { Prisma } from '../../../generated/prisma/client';
 import { AppConfig } from '../../../config/app.config';
 import { PrismaService } from '../../prisma/prisma.service';
 import {
@@ -51,8 +52,9 @@ export class GoogleStrategy
     };
   }
 
-  async create(input: CreateAuthMethodInput) {
-    return this.prisma.authMethod.create({
+  async create(input: CreateAuthMethodInput, db?: Prisma.TransactionClient) {
+    const client: Prisma.TransactionClient = db ?? this.prisma;
+    return client.authMethod.create({
       data: {
         userId: input.userId,
         provider: this.provider,

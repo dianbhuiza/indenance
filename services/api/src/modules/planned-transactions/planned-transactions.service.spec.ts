@@ -22,6 +22,8 @@ describe('PlannedTransactionsService', () => {
     plannedTransaction: {
       create: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn(),
+      findUniqueOrThrow: jest.fn(),
       delete: jest.fn(),
     },
     plannedTransactionAlert: {
@@ -38,6 +40,7 @@ describe('PlannedTransactionsService', () => {
       findFirst: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
+      deleteMany: jest.fn(),
     },
     plannedTransactionAlert: {
       updateMany: jest.fn(),
@@ -63,6 +66,9 @@ describe('PlannedTransactionsService', () => {
     categoryId: null,
     deletedAt: null,
     status: 'ACTIVE',
+    requiresApproval: true,
+    occurrences: null,
+    completedOccurrences: 0,
   };
 
   beforeEach(async () => {
@@ -120,10 +126,43 @@ describe('PlannedTransactionsService', () => {
           scheduledAt: dto.scheduledAt,
           isRecurring: true,
           interval: 'MONTHLY',
+          requiresApproval: true,
+          occurrences: null,
           categoryId: null,
         },
       });
       expect(result).toEqual(plannedTransactionMock);
+    });
+
+    it('stores the approval mode and the occurrence limit', async () => {
+      txMock.account.findFirst.mockResolvedValue(accountMock);
+      txMock.plannedTransaction.create.mockResolvedValue(
+        plannedTransactionMock,
+      );
+
+      await service.create('user-1', 'tenant-1', {
+        ...dto,
+        requiresApproval: false,
+        occurrences: 12,
+      });
+
+      expect(txMock.plannedTransaction.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          requiresApproval: false,
+          occurrences: 12,
+        }) as object,
+      });
+    });
+
+    it('rejects an occurrence limit on a non recurring plan', async () => {
+      await expect(
+        service.create('user-1', 'tenant-1', {
+          accountId: 'account-1',
+          amount: 500,
+          type: 'EXPENSE',
+          occurrences: 3,
+        }),
+      ).rejects.toBeInstanceOf(BadRequestException);
     });
 
     it('validates that the category belongs to the tenant', async () => {
@@ -256,14 +295,24 @@ describe('PlannedTransactionsService', () => {
           id: 'pt-1',
           tenantId: 'tenant-1',
           deletedAt: null,
-          status: 'ACTIVE',
           account: { userId: 'user-1' },
         },
       });
       expect(result).toEqual(plannedTransactionMock);
     });
 
-    it('throws NotFoundException for a completed plan', async () => {
+    it('returns completed plans so the list never 404s on detail', async () => {
+      prismaMock.plannedTransaction.findFirst.mockResolvedValue({
+        ...plannedTransactionMock,
+        status: 'COMPLETED',
+      });
+
+      const result = await service.findOne('user-1', 'tenant-1', 'pt-1');
+
+      expect(result.status).toBe('COMPLETED');
+    });
+
+    it('throws NotFoundException when the planned transaction was deleted', async () => {
       prismaMock.plannedTransaction.findFirst.mockResolvedValue(null);
 
       await expect(
@@ -285,7 +334,8 @@ describe('PlannedTransactionsService', () => {
       prismaMock.plannedTransaction.findFirst.mockResolvedValue(
         plannedTransactionMock,
       );
-      txMock.plannedTransaction.update.mockResolvedValue({
+      txMock.plannedTransaction.updateMany.mockResolvedValue({ count: 1 });
+      txMock.plannedTransaction.findUniqueOrThrow.mockResolvedValue({
         ...plannedTransactionMock,
         amount: 700,
       });
@@ -294,19 +344,68 @@ describe('PlannedTransactionsService', () => {
         amount: 700,
       });
 
-      expect(txMock.plannedTransaction.update).toHaveBeenCalledWith({
-        where: { id: 'pt-1' },
+      expect(txMock.plannedTransaction.updateMany).toHaveBeenCalledWith({
+        where: {
+          id: 'pt-1',
+          tenantId: 'tenant-1',
+          deletedAt: null,
+          status: 'ACTIVE',
+          account: { userId: 'user-1' },
+        },
         data: {
-          accountId: undefined,
           amount: 700,
-          type: undefined,
-          scheduledAt: undefined,
-          isRecurring: undefined,
-          interval: undefined,
-          categoryId: undefined,
+          isRecurring: true,
+          interval: 'MONTHLY',
+          requiresApproval: true,
+          occurrences: null,
         },
       });
       expect(result.amount).toBe(700);
+    });
+
+    it('updates the approval mode and the occurrence limit', async () => {
+      prismaMock.plannedTransaction.findFirst.mockResolvedValue(
+        plannedTransactionMock,
+      );
+      txMock.plannedTransaction.updateMany.mockResolvedValue({ count: 1 });
+      txMock.plannedTransaction.findUniqueOrThrow.mockResolvedValue({
+        ...plannedTransactionMock,
+        requiresApproval: false,
+        occurrences: 6,
+      });
+
+      await service.update('user-1', 'tenant-1', 'pt-1', {
+        requiresApproval: false,
+        occurrences: 6,
+      });
+
+      expect(txMock.plannedTransaction.updateMany).toHaveBeenCalledWith({
+        where: {
+          id: 'pt-1',
+          tenantId: 'tenant-1',
+          deletedAt: null,
+          status: 'ACTIVE',
+          account: { userId: 'user-1' },
+        },
+        data: {
+          isRecurring: true,
+          interval: 'MONTHLY',
+          requiresApproval: false,
+          occurrences: 6,
+        },
+      });
+    });
+
+    it('rejects an occurrence limit lower than the completed occurrences', async () => {
+      prismaMock.plannedTransaction.findFirst.mockResolvedValue({
+        ...plannedTransactionMock,
+        occurrences: 6,
+        completedOccurrences: 4,
+      });
+
+      await expect(
+        service.update('user-1', 'tenant-1', 'pt-1', { occurrences: 3 }),
+      ).rejects.toBeInstanceOf(BadRequestException);
     });
 
     it('validates the new account belongs to the user when changing it', async () => {
@@ -333,14 +432,53 @@ describe('PlannedTransactionsService', () => {
     });
 
     it('requires an interval when setting isRecurring to true', async () => {
-      prismaMock.plannedTransaction.findFirst.mockResolvedValue(
-        plannedTransactionMock,
-      );
+      prismaMock.plannedTransaction.findFirst.mockResolvedValue({
+        ...plannedTransactionMock,
+        isRecurring: false,
+        interval: null,
+      });
 
       await expect(
         service.update('user-1', 'tenant-1', 'pt-1', {
           isRecurring: true,
         }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it('rejects an interval on a non recurring plan', async () => {
+      prismaMock.plannedTransaction.findFirst.mockResolvedValue({
+        ...plannedTransactionMock,
+        isRecurring: false,
+        interval: null,
+      });
+
+      await expect(
+        service.update('user-1', 'tenant-1', 'pt-1', {
+          interval: 'MONTHLY',
+        }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it('rejects an occurrence limit on a non recurring plan', async () => {
+      prismaMock.plannedTransaction.findFirst.mockResolvedValue({
+        ...plannedTransactionMock,
+        isRecurring: false,
+        interval: null,
+      });
+
+      await expect(
+        service.update('user-1', 'tenant-1', 'pt-1', { occurrences: 5 }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it('rejects modifying a completed plan', async () => {
+      prismaMock.plannedTransaction.findFirst.mockResolvedValue({
+        ...plannedTransactionMock,
+        status: 'COMPLETED',
+      });
+
+      await expect(
+        service.update('user-1', 'tenant-1', 'pt-1', { amount: 700 }),
       ).rejects.toBeInstanceOf(BadRequestException);
     });
   });
@@ -350,7 +488,8 @@ describe('PlannedTransactionsService', () => {
       prismaMock.plannedTransaction.findFirst.mockResolvedValue(
         plannedTransactionMock,
       );
-      txMock.plannedTransaction.update.mockResolvedValue({
+      txMock.plannedTransaction.updateMany.mockResolvedValue({ count: 1 });
+      txMock.plannedTransaction.findUniqueOrThrow.mockResolvedValue({
         ...plannedTransactionMock,
         deletedAt: new Date(),
       });
@@ -362,8 +501,14 @@ describe('PlannedTransactionsService', () => {
         where: { plannedTransactionId: 'pt-1', status: 'PENDING' },
         data: { status: 'REJECTED', resolvedAt: expect.any(Date) as Date },
       });
-      expect(txMock.plannedTransaction.update).toHaveBeenCalledWith({
-        where: { id: 'pt-1' },
+      expect(txMock.plannedTransaction.updateMany).toHaveBeenCalledWith({
+        where: {
+          id: 'pt-1',
+          tenantId: 'tenant-1',
+          deletedAt: null,
+          status: 'ACTIVE',
+          account: { userId: 'user-1' },
+        },
         data: { deletedAt: expect.any(Date) as Date },
       });
       expect(result.deletedAt).toBeInstanceOf(Date);
@@ -383,14 +528,16 @@ describe('PlannedTransactionsService', () => {
       prismaMock.plannedTransaction.findFirst.mockResolvedValue(
         plannedTransactionMock,
       );
-      prismaMock.plannedTransaction.delete.mockResolvedValue(
-        plannedTransactionMock,
-      );
+      prismaMock.plannedTransaction.deleteMany.mockResolvedValue({ count: 1 });
 
       const result = await service.remove('user-1', 'tenant-1', 'pt-1');
 
-      expect(prismaMock.plannedTransaction.delete).toHaveBeenCalledWith({
-        where: { id: 'pt-1' },
+      expect(prismaMock.plannedTransaction.deleteMany).toHaveBeenCalledWith({
+        where: {
+          id: 'pt-1',
+          tenantId: 'tenant-1',
+          account: { userId: 'user-1' },
+        },
       });
       expect(result).toEqual(plannedTransactionMock);
     });

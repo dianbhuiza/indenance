@@ -17,7 +17,9 @@ describe('BudgetsService', () => {
       findFirst: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn(),
       delete: jest.fn(),
+      deleteMany: jest.fn(),
     },
     category: {
       findFirst: jest.fn(),
@@ -170,6 +172,54 @@ describe('BudgetsService', () => {
       expect(result[0].isExceeded).toBe(true);
       expect(result[0].remaining).toBe(-500);
     });
+
+    it('never counts expenses past the budget endDate', async () => {
+      const expired = {
+        ...budgetMock,
+        isRecurring: false,
+        interval: null,
+        startDate: new Date('2026-07-01T00:00:00.000Z'),
+        endDate: new Date('2026-07-31T23:59:59.999Z'),
+      };
+      prismaMock.budget.findMany.mockResolvedValue([expired]);
+      prismaMock.transaction.aggregate.mockResolvedValue({
+        _sum: { amount: 600 },
+      });
+
+      const result = await service.findAll('tenant-1', now);
+
+      expect(prismaMock.transaction.aggregate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          where: expect.objectContaining({
+            createdAt: {
+              gte: expired.startDate,
+              lt: expired.endDate,
+            },
+          }),
+        }),
+      );
+      expect(result[0].isActive).toBe(false);
+    });
+
+    it('reports isActive false for budgets that start in the future', async () => {
+      const future = {
+        ...budgetMock,
+        isRecurring: false,
+        interval: null,
+        startDate: new Date('2026-09-01T00:00:00.000Z'),
+        endDate: new Date('2026-09-30T00:00:00.000Z'),
+      };
+      prismaMock.budget.findMany.mockResolvedValue([future]);
+      prismaMock.transaction.aggregate.mockResolvedValue({
+        _sum: { amount: null },
+      });
+
+      const result = await service.findAll('tenant-1', now);
+
+      expect(result[0].isActive).toBe(false);
+      expect(result[0].spent).toBe(0);
+    });
   });
 
   describe('findOne', () => {
@@ -199,7 +249,8 @@ describe('BudgetsService', () => {
   describe('update', () => {
     it('updates the budget', async () => {
       prismaMock.budget.findFirst.mockResolvedValue(budgetMock);
-      prismaMock.budget.update.mockResolvedValue({
+      prismaMock.budget.updateMany.mockResolvedValue({ count: 1 });
+      prismaMock.budget.findFirst.mockResolvedValue({
         ...budgetMock,
         amount: 1200,
       });
@@ -208,17 +259,23 @@ describe('BudgetsService', () => {
         amount: 1200,
       });
 
-      expect(prismaMock.budget.update).toHaveBeenCalledWith({
-        where: { id: 'budget-1' },
-        data: { amount: 1200 },
+      expect(prismaMock.budget.updateMany).toHaveBeenCalledWith({
+        where: { id: 'budget-1', tenantId: 'tenant-1' },
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        data: expect.objectContaining({
+          amount: 1200,
+          isRecurring: true,
+          interval: 'MONTHLY',
+          exceededAt: null,
+        }),
       });
       expect(result.amount).toBe(1200);
     });
 
     it('throws BadRequestException when setting recurring without interval', async () => {
-      prismaMock.budget.findFirst.mockResolvedValue(budgetMock);
-      prismaMock.budget.findUnique.mockResolvedValue({
+      prismaMock.budget.findFirst.mockResolvedValue({
         ...budgetMock,
+        isRecurring: false,
         interval: null,
       });
 
@@ -226,17 +283,37 @@ describe('BudgetsService', () => {
         service.update('tenant-1', 'budget-1', { isRecurring: true }),
       ).rejects.toBeInstanceOf(BadRequestException);
     });
+
+    it('throws BadRequestException when interval is set on a non recurring budget', async () => {
+      prismaMock.budget.findFirst.mockResolvedValue({
+        ...budgetMock,
+        isRecurring: false,
+        interval: null,
+      });
+
+      await expect(
+        service.update('tenant-1', 'budget-1', { interval: 'MONTHLY' }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it('reports NotFound when the budget belongs to another tenant', async () => {
+      prismaMock.budget.findFirst.mockResolvedValue(null);
+
+      await expect(
+        service.update('tenant-1', 'budget-other', { amount: 500 }),
+      ).rejects.toBeInstanceOf(NotFoundException);
+    });
   });
 
   describe('remove', () => {
     it('deletes the budget', async () => {
       prismaMock.budget.findFirst.mockResolvedValue(budgetMock);
-      prismaMock.budget.delete.mockResolvedValue(budgetMock);
+      prismaMock.budget.deleteMany.mockResolvedValue({ count: 1 });
 
       const result = await service.remove('tenant-1', 'budget-1');
 
-      expect(prismaMock.budget.delete).toHaveBeenCalledWith({
-        where: { id: 'budget-1' },
+      expect(prismaMock.budget.deleteMany).toHaveBeenCalledWith({
+        where: { id: 'budget-1', tenantId: 'tenant-1' },
       });
       expect(result).toEqual(budgetMock);
     });
@@ -282,6 +359,28 @@ describe('BudgetsService', () => {
       );
 
       expect(txMock.budget.update).not.toHaveBeenCalled();
+    });
+
+    it('clears a stale exceededAt when the budget fits again', async () => {
+      txMock.budget.findMany.mockResolvedValue([
+        { ...budgetMock, exceededAt: new Date('2026-08-10T00:00:00.000Z') },
+      ]);
+      txMock.transaction.aggregate.mockResolvedValue({
+        _sum: { amount: 500 },
+      });
+
+      await service.applyExpense(
+        txMock as never,
+        'tenant-1',
+        'cat-1',
+        100,
+        now,
+      );
+
+      expect(txMock.budget.update).toHaveBeenCalledWith({
+        where: { id: 'budget-1' },
+        data: { exceededAt: null },
+      });
     });
 
     it('ignores budgets of other categories', async () => {

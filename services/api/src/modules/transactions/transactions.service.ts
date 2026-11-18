@@ -1,9 +1,7 @@
-import {
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import type { Prisma, Transaction } from '../../generated/prisma/client';
 import { assertTenant } from '../shared/assert-tenant';
+import { assertCategoryBelongsToTenant } from '../shared/assert-category';
 import { BudgetsService } from '../budgets/budgets.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { TransactionContextService } from '../shared/transaction-context/transaction-context.service';
@@ -42,6 +40,8 @@ export class TransactionsService {
     });
     if (!account)
       throw new NotFoundException(`Account with id ${dto.accountId} not found`);
+
+    await assertCategoryBelongsToTenant(tx, tenantId, dto.categoryId);
 
     const transaction = await tx.transaction.create({
       data: {

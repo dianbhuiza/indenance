@@ -1,4 +1,8 @@
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../prisma/prisma.service';
 import { AccountsService } from './accounts.service';
@@ -11,7 +15,15 @@ describe('AccountsService', () => {
       findMany: jest.fn(),
       findFirst: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn(),
       delete: jest.fn(),
+      deleteMany: jest.fn(),
+    },
+    transaction: {
+      count: jest.fn(),
+    },
+    plannedTransaction: {
+      count: jest.fn(),
     },
   };
 
@@ -132,8 +144,8 @@ describe('AccountsService', () => {
 
   describe('update', () => {
     it('updates an owned account', async () => {
-      prismaMock.account.findFirst.mockResolvedValue(accountMock);
-      prismaMock.account.update.mockResolvedValue({
+      prismaMock.account.updateMany.mockResolvedValue({ count: 1 });
+      prismaMock.account.findFirst.mockResolvedValue({
         ...accountMock,
         name: 'Efectivo',
       });
@@ -142,15 +154,15 @@ describe('AccountsService', () => {
         name: 'Efectivo',
       });
 
-      expect(prismaMock.account.update).toHaveBeenCalledWith({
-        where: { id: 'account-1' },
+      expect(prismaMock.account.updateMany).toHaveBeenCalledWith({
+        where: { id: 'account-1', userId: 'user-1', tenantId: 'tenant-1' },
         data: { name: 'Efectivo' },
       });
       expect(result.name).toBe('Efectivo');
     });
 
     it('throws NotFoundException when the account belongs to another user', async () => {
-      prismaMock.account.findFirst.mockResolvedValue(null);
+      prismaMock.account.updateMany.mockResolvedValue({ count: 0 });
 
       await expect(
         service.update('user-1', 'tenant-1', 'account-other', {
@@ -163,14 +175,28 @@ describe('AccountsService', () => {
   describe('remove', () => {
     it('deletes an owned account', async () => {
       prismaMock.account.findFirst.mockResolvedValue(accountMock);
-      prismaMock.account.delete.mockResolvedValue(accountMock);
+      prismaMock.transaction.count.mockResolvedValue(0);
+      prismaMock.plannedTransaction.count.mockResolvedValue(0);
+      prismaMock.account.deleteMany.mockResolvedValue({ count: 1 });
 
       const result = await service.remove('user-1', 'tenant-1', 'account-1');
 
-      expect(prismaMock.account.delete).toHaveBeenCalledWith({
-        where: { id: 'account-1' },
+      expect(prismaMock.account.deleteMany).toHaveBeenCalledWith({
+        where: { id: 'account-1', userId: 'user-1', tenantId: 'tenant-1' },
       });
       expect(result).toEqual(accountMock);
+    });
+
+    it('refuses to delete an account that has transactions', async () => {
+      prismaMock.account.findFirst.mockResolvedValue(accountMock);
+      prismaMock.transaction.count.mockResolvedValue(3);
+      prismaMock.plannedTransaction.count.mockResolvedValue(0);
+
+      await expect(
+        service.remove('user-1', 'tenant-1', 'account-1'),
+      ).rejects.toBeInstanceOf(ConflictException);
+
+      expect(prismaMock.account.deleteMany).not.toHaveBeenCalled();
     });
 
     it('throws NotFoundException when the account belongs to another user', async () => {

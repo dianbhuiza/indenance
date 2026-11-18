@@ -229,6 +229,7 @@ export type AccountWhereInput = {
   transactions?: Prisma.TransactionListRelationFilter
   plannedTransactions?: Prisma.PlannedTransactionListRelationFilter
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertListRelationFilter
+  loans?: Prisma.LoanListRelationFilter
 }
 
 export type AccountOrderByWithRelationInput = {
@@ -243,6 +244,7 @@ export type AccountOrderByWithRelationInput = {
   transactions?: Prisma.TransactionOrderByRelationAggregateInput
   plannedTransactions?: Prisma.PlannedTransactionOrderByRelationAggregateInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertOrderByRelationAggregateInput
+  loans?: Prisma.LoanOrderByRelationAggregateInput
 }
 
 export type AccountWhereUniqueInput = Prisma.AtLeast<{
@@ -260,6 +262,7 @@ export type AccountWhereUniqueInput = Prisma.AtLeast<{
   transactions?: Prisma.TransactionListRelationFilter
   plannedTransactions?: Prisma.PlannedTransactionListRelationFilter
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertListRelationFilter
+  loans?: Prisma.LoanListRelationFilter
 }, "id">
 
 export type AccountOrderByWithAggregationInput = {
@@ -298,6 +301,7 @@ export type AccountCreateInput = {
   transactions?: Prisma.TransactionCreateNestedManyWithoutAccountInput
   plannedTransactions?: Prisma.PlannedTransactionCreateNestedManyWithoutAccountInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertCreateNestedManyWithoutAccountInput
+  loans?: Prisma.LoanCreateNestedManyWithoutAccountInput
 }
 
 export type AccountUncheckedCreateInput = {
@@ -310,6 +314,7 @@ export type AccountUncheckedCreateInput = {
   transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutAccountInput
   plannedTransactions?: Prisma.PlannedTransactionUncheckedCreateNestedManyWithoutAccountInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUncheckedCreateNestedManyWithoutAccountInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutAccountInput
 }
 
 export type AccountUpdateInput = {
@@ -322,6 +327,7 @@ export type AccountUpdateInput = {
   transactions?: Prisma.TransactionUpdateManyWithoutAccountNestedInput
   plannedTransactions?: Prisma.PlannedTransactionUpdateManyWithoutAccountNestedInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUpdateManyWithoutAccountNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutAccountNestedInput
 }
 
 export type AccountUncheckedUpdateInput = {
@@ -334,6 +340,7 @@ export type AccountUncheckedUpdateInput = {
   transactions?: Prisma.TransactionUncheckedUpdateManyWithoutAccountNestedInput
   plannedTransactions?: Prisma.PlannedTransactionUncheckedUpdateManyWithoutAccountNestedInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUncheckedUpdateManyWithoutAccountNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutAccountNestedInput
 }
 
 export type AccountCreateManyInput = {
@@ -545,6 +552,20 @@ export type AccountUpdateOneRequiredWithoutPlannedTransactionAlertsNestedInput =
   update?: Prisma.XOR<Prisma.XOR<Prisma.AccountUpdateToOneWithWhereWithoutPlannedTransactionAlertsInput, Prisma.AccountUpdateWithoutPlannedTransactionAlertsInput>, Prisma.AccountUncheckedUpdateWithoutPlannedTransactionAlertsInput>
 }
 
+export type AccountCreateNestedOneWithoutLoansInput = {
+  create?: Prisma.XOR<Prisma.AccountCreateWithoutLoansInput, Prisma.AccountUncheckedCreateWithoutLoansInput>
+  connectOrCreate?: Prisma.AccountCreateOrConnectWithoutLoansInput
+  connect?: Prisma.AccountWhereUniqueInput
+}
+
+export type AccountUpdateOneRequiredWithoutLoansNestedInput = {
+  create?: Prisma.XOR<Prisma.AccountCreateWithoutLoansInput, Prisma.AccountUncheckedCreateWithoutLoansInput>
+  connectOrCreate?: Prisma.AccountCreateOrConnectWithoutLoansInput
+  upsert?: Prisma.AccountUpsertWithoutLoansInput
+  connect?: Prisma.AccountWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AccountUpdateToOneWithWhereWithoutLoansInput, Prisma.AccountUpdateWithoutLoansInput>, Prisma.AccountUncheckedUpdateWithoutLoansInput>
+}
+
 export type AccountCreateWithoutUserInput = {
   id?: string
   name: string
@@ -554,6 +575,7 @@ export type AccountCreateWithoutUserInput = {
   transactions?: Prisma.TransactionCreateNestedManyWithoutAccountInput
   plannedTransactions?: Prisma.PlannedTransactionCreateNestedManyWithoutAccountInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertCreateNestedManyWithoutAccountInput
+  loans?: Prisma.LoanCreateNestedManyWithoutAccountInput
 }
 
 export type AccountUncheckedCreateWithoutUserInput = {
@@ -565,6 +587,7 @@ export type AccountUncheckedCreateWithoutUserInput = {
   transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutAccountInput
   plannedTransactions?: Prisma.PlannedTransactionUncheckedCreateNestedManyWithoutAccountInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUncheckedCreateNestedManyWithoutAccountInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutAccountInput
 }
 
 export type AccountCreateOrConnectWithoutUserInput = {
@@ -614,6 +637,7 @@ export type AccountCreateWithoutTenantInput = {
   transactions?: Prisma.TransactionCreateNestedManyWithoutAccountInput
   plannedTransactions?: Prisma.PlannedTransactionCreateNestedManyWithoutAccountInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertCreateNestedManyWithoutAccountInput
+  loans?: Prisma.LoanCreateNestedManyWithoutAccountInput
 }
 
 export type AccountUncheckedCreateWithoutTenantInput = {
@@ -625,6 +649,7 @@ export type AccountUncheckedCreateWithoutTenantInput = {
   transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutAccountInput
   plannedTransactions?: Prisma.PlannedTransactionUncheckedCreateNestedManyWithoutAccountInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUncheckedCreateNestedManyWithoutAccountInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutAccountInput
 }
 
 export type AccountCreateOrConnectWithoutTenantInput = {
@@ -662,6 +687,7 @@ export type AccountCreateWithoutTransactionsInput = {
   tenant: Prisma.TenantCreateNestedOneWithoutAccountsInput
   plannedTransactions?: Prisma.PlannedTransactionCreateNestedManyWithoutAccountInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertCreateNestedManyWithoutAccountInput
+  loans?: Prisma.LoanCreateNestedManyWithoutAccountInput
 }
 
 export type AccountUncheckedCreateWithoutTransactionsInput = {
@@ -673,6 +699,7 @@ export type AccountUncheckedCreateWithoutTransactionsInput = {
   balance?: number
   plannedTransactions?: Prisma.PlannedTransactionUncheckedCreateNestedManyWithoutAccountInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUncheckedCreateNestedManyWithoutAccountInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutAccountInput
 }
 
 export type AccountCreateOrConnectWithoutTransactionsInput = {
@@ -700,6 +727,7 @@ export type AccountUpdateWithoutTransactionsInput = {
   tenant?: Prisma.TenantUpdateOneRequiredWithoutAccountsNestedInput
   plannedTransactions?: Prisma.PlannedTransactionUpdateManyWithoutAccountNestedInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUpdateManyWithoutAccountNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutAccountNestedInput
 }
 
 export type AccountUncheckedUpdateWithoutTransactionsInput = {
@@ -711,6 +739,7 @@ export type AccountUncheckedUpdateWithoutTransactionsInput = {
   balance?: Prisma.IntFieldUpdateOperationsInput | number
   plannedTransactions?: Prisma.PlannedTransactionUncheckedUpdateManyWithoutAccountNestedInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUncheckedUpdateManyWithoutAccountNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutAccountNestedInput
 }
 
 export type AccountCreateWithoutPlannedTransactionsInput = {
@@ -722,6 +751,7 @@ export type AccountCreateWithoutPlannedTransactionsInput = {
   tenant: Prisma.TenantCreateNestedOneWithoutAccountsInput
   transactions?: Prisma.TransactionCreateNestedManyWithoutAccountInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertCreateNestedManyWithoutAccountInput
+  loans?: Prisma.LoanCreateNestedManyWithoutAccountInput
 }
 
 export type AccountUncheckedCreateWithoutPlannedTransactionsInput = {
@@ -733,6 +763,7 @@ export type AccountUncheckedCreateWithoutPlannedTransactionsInput = {
   balance?: number
   transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutAccountInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUncheckedCreateNestedManyWithoutAccountInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutAccountInput
 }
 
 export type AccountCreateOrConnectWithoutPlannedTransactionsInput = {
@@ -760,6 +791,7 @@ export type AccountUpdateWithoutPlannedTransactionsInput = {
   tenant?: Prisma.TenantUpdateOneRequiredWithoutAccountsNestedInput
   transactions?: Prisma.TransactionUpdateManyWithoutAccountNestedInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUpdateManyWithoutAccountNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutAccountNestedInput
 }
 
 export type AccountUncheckedUpdateWithoutPlannedTransactionsInput = {
@@ -771,6 +803,7 @@ export type AccountUncheckedUpdateWithoutPlannedTransactionsInput = {
   balance?: Prisma.IntFieldUpdateOperationsInput | number
   transactions?: Prisma.TransactionUncheckedUpdateManyWithoutAccountNestedInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUncheckedUpdateManyWithoutAccountNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutAccountNestedInput
 }
 
 export type AccountCreateWithoutPlannedTransactionAlertsInput = {
@@ -782,6 +815,7 @@ export type AccountCreateWithoutPlannedTransactionAlertsInput = {
   tenant: Prisma.TenantCreateNestedOneWithoutAccountsInput
   transactions?: Prisma.TransactionCreateNestedManyWithoutAccountInput
   plannedTransactions?: Prisma.PlannedTransactionCreateNestedManyWithoutAccountInput
+  loans?: Prisma.LoanCreateNestedManyWithoutAccountInput
 }
 
 export type AccountUncheckedCreateWithoutPlannedTransactionAlertsInput = {
@@ -793,6 +827,7 @@ export type AccountUncheckedCreateWithoutPlannedTransactionAlertsInput = {
   balance?: number
   transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutAccountInput
   plannedTransactions?: Prisma.PlannedTransactionUncheckedCreateNestedManyWithoutAccountInput
+  loans?: Prisma.LoanUncheckedCreateNestedManyWithoutAccountInput
 }
 
 export type AccountCreateOrConnectWithoutPlannedTransactionAlertsInput = {
@@ -820,6 +855,7 @@ export type AccountUpdateWithoutPlannedTransactionAlertsInput = {
   tenant?: Prisma.TenantUpdateOneRequiredWithoutAccountsNestedInput
   transactions?: Prisma.TransactionUpdateManyWithoutAccountNestedInput
   plannedTransactions?: Prisma.PlannedTransactionUpdateManyWithoutAccountNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutAccountNestedInput
 }
 
 export type AccountUncheckedUpdateWithoutPlannedTransactionAlertsInput = {
@@ -831,6 +867,71 @@ export type AccountUncheckedUpdateWithoutPlannedTransactionAlertsInput = {
   balance?: Prisma.IntFieldUpdateOperationsInput | number
   transactions?: Prisma.TransactionUncheckedUpdateManyWithoutAccountNestedInput
   plannedTransactions?: Prisma.PlannedTransactionUncheckedUpdateManyWithoutAccountNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutAccountNestedInput
+}
+
+export type AccountCreateWithoutLoansInput = {
+  id?: string
+  name: string
+  currency: string
+  balance?: number
+  user: Prisma.UserCreateNestedOneWithoutAccountsInput
+  tenant: Prisma.TenantCreateNestedOneWithoutAccountsInput
+  transactions?: Prisma.TransactionCreateNestedManyWithoutAccountInput
+  plannedTransactions?: Prisma.PlannedTransactionCreateNestedManyWithoutAccountInput
+  plannedTransactionAlerts?: Prisma.PlannedTransactionAlertCreateNestedManyWithoutAccountInput
+}
+
+export type AccountUncheckedCreateWithoutLoansInput = {
+  id?: string
+  userId: string
+  tenantId: string
+  name: string
+  currency: string
+  balance?: number
+  transactions?: Prisma.TransactionUncheckedCreateNestedManyWithoutAccountInput
+  plannedTransactions?: Prisma.PlannedTransactionUncheckedCreateNestedManyWithoutAccountInput
+  plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUncheckedCreateNestedManyWithoutAccountInput
+}
+
+export type AccountCreateOrConnectWithoutLoansInput = {
+  where: Prisma.AccountWhereUniqueInput
+  create: Prisma.XOR<Prisma.AccountCreateWithoutLoansInput, Prisma.AccountUncheckedCreateWithoutLoansInput>
+}
+
+export type AccountUpsertWithoutLoansInput = {
+  update: Prisma.XOR<Prisma.AccountUpdateWithoutLoansInput, Prisma.AccountUncheckedUpdateWithoutLoansInput>
+  create: Prisma.XOR<Prisma.AccountCreateWithoutLoansInput, Prisma.AccountUncheckedCreateWithoutLoansInput>
+  where?: Prisma.AccountWhereInput
+}
+
+export type AccountUpdateToOneWithWhereWithoutLoansInput = {
+  where?: Prisma.AccountWhereInput
+  data: Prisma.XOR<Prisma.AccountUpdateWithoutLoansInput, Prisma.AccountUncheckedUpdateWithoutLoansInput>
+}
+
+export type AccountUpdateWithoutLoansInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  balance?: Prisma.IntFieldUpdateOperationsInput | number
+  user?: Prisma.UserUpdateOneRequiredWithoutAccountsNestedInput
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutAccountsNestedInput
+  transactions?: Prisma.TransactionUpdateManyWithoutAccountNestedInput
+  plannedTransactions?: Prisma.PlannedTransactionUpdateManyWithoutAccountNestedInput
+  plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUpdateManyWithoutAccountNestedInput
+}
+
+export type AccountUncheckedUpdateWithoutLoansInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  currency?: Prisma.StringFieldUpdateOperationsInput | string
+  balance?: Prisma.IntFieldUpdateOperationsInput | number
+  transactions?: Prisma.TransactionUncheckedUpdateManyWithoutAccountNestedInput
+  plannedTransactions?: Prisma.PlannedTransactionUncheckedUpdateManyWithoutAccountNestedInput
+  plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUncheckedUpdateManyWithoutAccountNestedInput
 }
 
 export type AccountCreateManyUserInput = {
@@ -850,6 +951,7 @@ export type AccountUpdateWithoutUserInput = {
   transactions?: Prisma.TransactionUpdateManyWithoutAccountNestedInput
   plannedTransactions?: Prisma.PlannedTransactionUpdateManyWithoutAccountNestedInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUpdateManyWithoutAccountNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutAccountNestedInput
 }
 
 export type AccountUncheckedUpdateWithoutUserInput = {
@@ -861,6 +963,7 @@ export type AccountUncheckedUpdateWithoutUserInput = {
   transactions?: Prisma.TransactionUncheckedUpdateManyWithoutAccountNestedInput
   plannedTransactions?: Prisma.PlannedTransactionUncheckedUpdateManyWithoutAccountNestedInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUncheckedUpdateManyWithoutAccountNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutAccountNestedInput
 }
 
 export type AccountUncheckedUpdateManyWithoutUserInput = {
@@ -888,6 +991,7 @@ export type AccountUpdateWithoutTenantInput = {
   transactions?: Prisma.TransactionUpdateManyWithoutAccountNestedInput
   plannedTransactions?: Prisma.PlannedTransactionUpdateManyWithoutAccountNestedInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUpdateManyWithoutAccountNestedInput
+  loans?: Prisma.LoanUpdateManyWithoutAccountNestedInput
 }
 
 export type AccountUncheckedUpdateWithoutTenantInput = {
@@ -899,6 +1003,7 @@ export type AccountUncheckedUpdateWithoutTenantInput = {
   transactions?: Prisma.TransactionUncheckedUpdateManyWithoutAccountNestedInput
   plannedTransactions?: Prisma.PlannedTransactionUncheckedUpdateManyWithoutAccountNestedInput
   plannedTransactionAlerts?: Prisma.PlannedTransactionAlertUncheckedUpdateManyWithoutAccountNestedInput
+  loans?: Prisma.LoanUncheckedUpdateManyWithoutAccountNestedInput
 }
 
 export type AccountUncheckedUpdateManyWithoutTenantInput = {
@@ -918,12 +1023,14 @@ export type AccountCountOutputType = {
   transactions: number
   plannedTransactions: number
   plannedTransactionAlerts: number
+  loans: number
 }
 
 export type AccountCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   transactions?: boolean | AccountCountOutputTypeCountTransactionsArgs
   plannedTransactions?: boolean | AccountCountOutputTypeCountPlannedTransactionsArgs
   plannedTransactionAlerts?: boolean | AccountCountOutputTypeCountPlannedTransactionAlertsArgs
+  loans?: boolean | AccountCountOutputTypeCountLoansArgs
 }
 
 /**
@@ -957,6 +1064,13 @@ export type AccountCountOutputTypeCountPlannedTransactionAlertsArgs<ExtArgs exte
   where?: Prisma.PlannedTransactionAlertWhereInput
 }
 
+/**
+ * AccountCountOutputType without action
+ */
+export type AccountCountOutputTypeCountLoansArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LoanWhereInput
+}
+
 
 export type AccountSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -970,6 +1084,7 @@ export type AccountSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   transactions?: boolean | Prisma.Account$transactionsArgs<ExtArgs>
   plannedTransactions?: boolean | Prisma.Account$plannedTransactionsArgs<ExtArgs>
   plannedTransactionAlerts?: boolean | Prisma.Account$plannedTransactionAlertsArgs<ExtArgs>
+  loans?: boolean | Prisma.Account$loansArgs<ExtArgs>
   _count?: boolean | Prisma.AccountCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["account"]>
 
@@ -1011,6 +1126,7 @@ export type AccountInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   transactions?: boolean | Prisma.Account$transactionsArgs<ExtArgs>
   plannedTransactions?: boolean | Prisma.Account$plannedTransactionsArgs<ExtArgs>
   plannedTransactionAlerts?: boolean | Prisma.Account$plannedTransactionAlertsArgs<ExtArgs>
+  loans?: boolean | Prisma.Account$loansArgs<ExtArgs>
   _count?: boolean | Prisma.AccountCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AccountIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1030,6 +1146,7 @@ export type $AccountPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     transactions: Prisma.$TransactionPayload<ExtArgs>[]
     plannedTransactions: Prisma.$PlannedTransactionPayload<ExtArgs>[]
     plannedTransactionAlerts: Prisma.$PlannedTransactionAlertPayload<ExtArgs>[]
+    loans: Prisma.$LoanPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1437,6 +1554,7 @@ export interface Prisma__AccountClient<T, Null = never, ExtArgs extends runtime.
   transactions<T extends Prisma.Account$transactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Account$transactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   plannedTransactions<T extends Prisma.Account$plannedTransactionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Account$plannedTransactionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlannedTransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   plannedTransactionAlerts<T extends Prisma.Account$plannedTransactionAlertsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Account$plannedTransactionAlertsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlannedTransactionAlertPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  loans<T extends Prisma.Account$loansArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Account$loansArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LoanPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1942,6 +2060,30 @@ export type Account$plannedTransactionAlertsArgs<ExtArgs extends runtime.Types.E
   take?: number
   skip?: number
   distinct?: Prisma.PlannedTransactionAlertScalarFieldEnum | Prisma.PlannedTransactionAlertScalarFieldEnum[]
+}
+
+/**
+ * Account.loans
+ */
+export type Account$loansArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Loan
+   */
+  select?: Prisma.LoanSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Loan
+   */
+  omit?: Prisma.LoanOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LoanInclude<ExtArgs> | null
+  where?: Prisma.LoanWhereInput
+  orderBy?: Prisma.LoanOrderByWithRelationInput | Prisma.LoanOrderByWithRelationInput[]
+  cursor?: Prisma.LoanWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LoanScalarFieldEnum | Prisma.LoanScalarFieldEnum[]
 }
 
 /**

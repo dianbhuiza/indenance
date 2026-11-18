@@ -1,17 +1,23 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Req,
 } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import { Roles } from '../auth/guards/roles.decorator';
+import type { AuthenticatedRequest } from '../auth/guards/auth.guard';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
+@ApiTags('users')
 @Controller('users')
+@Roles('ADMIN')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -31,8 +37,21 @@ export class UsersController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(id, updateUserDto);
+  update(
+    @Req() request: AuthenticatedRequest,
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return this.usersService.updateAsAdmin(
+      request.user.userId,
+      id,
+      updateUserDto,
+    );
+  }
+
+  @Post(':id/verify-email')
+  verifyEmail(@Param('id') id: string) {
+    return this.usersService.verifyEmail(id);
   }
 
   @Delete(':id')

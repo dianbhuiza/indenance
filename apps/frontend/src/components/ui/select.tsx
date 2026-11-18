@@ -1,4 +1,8 @@
 import { Select as BaseSelect } from '@base-ui/react/select';
+import type {
+  SelectRootProps,
+  SelectRootChangeEventDetails,
+} from '@base-ui/react/select';
 import { ChevronDown } from 'lucide-react';
 import clsx from 'clsx';
 
@@ -32,7 +36,7 @@ function SelectPopup({
   return (
     <BaseSelect.Popup
       className={clsx(
-        'z-50 min-w-[180px] rounded-xl border border-border bg-surface p-1.5 shadow-lg',
+        'z-[60] min-w-[180px] rounded-xl border border-border bg-surface p-1.5 shadow-lg',
         'data-[state=open]:animate-slide-in',
         className,
       )}
@@ -73,8 +77,24 @@ function SelectSeparator({
   );
 }
 
-export function Select({ className, ...props }: React.ComponentProps<typeof BaseSelect.Root>) {
-  return <BaseSelect.Root className={className} {...props} />;
+interface AppSelectProps extends Omit<SelectRootProps<string, false>, 'onValueChange'> {
+  onValueChange?: (
+    value: string,
+    eventDetails: SelectRootChangeEventDetails,
+  ) => void;
+}
+
+export function Select({ onValueChange, ...props }: AppSelectProps) {
+  return (
+    <BaseSelect.Root<string, false>
+      {...props}
+      onValueChange={
+        onValueChange
+          ? (value, eventDetails) => onValueChange(value ?? '', eventDetails)
+          : undefined
+      }
+    />
+  );
 }
 
 Select.Trigger = SelectTrigger;

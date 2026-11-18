@@ -14,21 +14,27 @@ describe('ShoppingListsService', () => {
   let service: ShoppingListsService;
 
   const prismaMock = {
-    $transaction: jest.fn((fn: (tx: unknown) => Promise<unknown>) =>
-      fn(prismaTxMock),
+    $transaction: jest.fn((arg: unknown) =>
+      Array.isArray(arg)
+        ? Promise.all(arg)
+        : (arg as (tx: unknown) => Promise<unknown>)(prismaTxMock),
     ),
     shoppingList: {
       create: jest.fn(),
       findMany: jest.fn(),
       findFirst: jest.fn(),
+      findUniqueOrThrow: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn(),
       delete: jest.fn(),
+      deleteMany: jest.fn(),
     },
     shoppingListItem: {
       create: jest.fn(),
       findFirst: jest.fn(),
       update: jest.fn(),
       delete: jest.fn(),
+      deleteMany: jest.fn(),
     },
     category: {
       findFirst: jest.fn(),
@@ -40,7 +46,13 @@ describe('ShoppingListsService', () => {
       deleteMany: jest.fn(),
     },
     shoppingList: {
+      findFirst: jest.fn(),
+      findUniqueOrThrow: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn(),
+    },
+    category: {
+      findFirst: jest.fn(),
     },
   };
 
@@ -198,8 +210,8 @@ describe('ShoppingListsService', () => {
 
   describe('update', () => {
     it('updates the list', async () => {
-      prismaMock.shoppingList.findFirst.mockResolvedValue(listMock);
-      prismaMock.shoppingList.update.mockResolvedValue({
+      prismaMock.shoppingList.updateMany.mockResolvedValue({ count: 1 });
+      prismaMock.shoppingList.findFirst.mockResolvedValue({
         ...listMock,
         name: 'Mercado grande',
       });
@@ -208,44 +220,71 @@ describe('ShoppingListsService', () => {
         name: 'Mercado grande',
       });
 
-      expect(prismaMock.shoppingList.update).toHaveBeenCalledWith({
-        where: { id: 'list-1' },
+      expect(prismaMock.shoppingList.updateMany).toHaveBeenCalledWith({
+        where: { id: 'list-1', tenantId: 'tenant-1', deletedAt: null },
         data: { name: 'Mercado grande' },
-        include: { items: true },
       });
       expect(result.name).toBe('Mercado grande');
+    });
+
+    it('throws NotFoundException when the list does not exist', async () => {
+      prismaMock.shoppingList.updateMany.mockResolvedValue({ count: 0 });
+
+      await expect(
+        service.update('tenant-1', 'list-other', { name: 'Otra' }),
+      ).rejects.toBeInstanceOf(NotFoundException);
     });
   });
 
   describe('softDelete', () => {
     it('soft deletes the list', async () => {
-      prismaMock.shoppingList.findFirst.mockResolvedValue(listMock);
-      prismaMock.shoppingList.update.mockResolvedValue({
+      prismaMock.shoppingList.updateMany.mockResolvedValue({ count: 1 });
+      prismaMock.shoppingList.findUniqueOrThrow.mockResolvedValue({
         ...listMock,
         deletedAt: new Date(),
       });
 
       const result = await service.softDelete('tenant-1', 'list-1');
 
-      expect(prismaMock.shoppingList.update).toHaveBeenCalledWith({
-        where: { id: 'list-1' },
+      expect(prismaMock.shoppingList.updateMany).toHaveBeenCalledWith({
+        where: { id: 'list-1', tenantId: 'tenant-1', deletedAt: null },
         data: { deletedAt: expect.any(Date) as Date },
       });
       expect(result).toBeDefined();
+    });
+
+    it('throws NotFoundException when the list does not exist', async () => {
+      prismaMock.shoppingList.updateMany.mockResolvedValue({ count: 0 });
+
+      await expect(
+        service.softDelete('tenant-1', 'list-other'),
+      ).rejects.toBeInstanceOf(NotFoundException);
     });
   });
 
   describe('remove', () => {
     it('removes the list', async () => {
       prismaMock.shoppingList.findFirst.mockResolvedValue(listMock);
-      prismaMock.shoppingList.delete.mockResolvedValue(listMock);
+      prismaMock.shoppingListItem.deleteMany.mockResolvedValue({ count: 2 });
+      prismaMock.shoppingList.deleteMany.mockResolvedValue({ count: 1 });
 
       const result = await service.remove('tenant-1', 'list-1');
 
-      expect(prismaMock.shoppingList.delete).toHaveBeenCalledWith({
-        where: { id: 'list-1' },
+      expect(prismaMock.shoppingListItem.deleteMany).toHaveBeenCalledWith({
+        where: { shoppingListId: 'list-1' },
+      });
+      expect(prismaMock.shoppingList.deleteMany).toHaveBeenCalledWith({
+        where: { id: 'list-1', tenantId: 'tenant-1' },
       });
       expect(result).toEqual(listMock);
+    });
+
+    it('throws NotFoundException when the list does not exist', async () => {
+      prismaMock.shoppingList.findFirst.mockResolvedValue(null);
+
+      await expect(
+        service.remove('tenant-1', 'list-other'),
+      ).rejects.toBeInstanceOf(NotFoundException);
     });
   });
 
@@ -342,19 +381,33 @@ describe('ShoppingListsService', () => {
   });
 
   describe('purchase', () => {
+    const purchasedList = {
+      ...listMock,
+      purchasedAt: new Date('2026-10-01T12:00:00.000Z'),
+    };
+
     it('creates the transaction for purchased items and deletes the rest', async () => {
-      prismaMock.shoppingList.findFirst.mockResolvedValue(listMock);
+      prismaTxMock.shoppingList.findFirst.mockResolvedValue(listMock);
+      prismaTxMock.shoppingList.updateMany.mockResolvedValue({ count: 1 });
       eventEmitterMock.emitAsync.mockResolvedValue([transactionMock]);
       prismaTxMock.shoppingListItem.deleteMany.mockResolvedValue({ count: 1 });
-      prismaTxMock.shoppingList.update.mockResolvedValue({
-        ...listMock,
-        purchasedAt: new Date(),
-      });
+      prismaTxMock.shoppingList.findUniqueOrThrow.mockResolvedValue(
+        purchasedList,
+      );
 
       const result = await service.purchase('user-1', 'tenant-1', 'list-1', {
         accountId: 'account-1',
       });
 
+      expect(prismaTxMock.shoppingList.updateMany).toHaveBeenCalledWith({
+        where: {
+          id: 'list-1',
+          tenantId: 'tenant-1',
+          deletedAt: null,
+          purchasedAt: null,
+        },
+        data: { purchasedAt: expect.any(Date) as Date },
+      });
       expect(eventEmitterMock.emitAsync).toHaveBeenCalledWith(
         TRANSACTION_REQUESTED_EVENT,
         {
@@ -369,28 +422,34 @@ describe('ShoppingListsService', () => {
       expect(prismaTxMock.shoppingListItem.deleteMany).toHaveBeenCalledWith({
         where: { shoppingListId: 'list-1', isPurchased: false },
       });
-      expect(prismaTxMock.shoppingList.update).toHaveBeenCalledWith({
+      expect(prismaTxMock.shoppingList.findUniqueOrThrow).toHaveBeenCalledWith({
         where: { id: 'list-1' },
-        data: { purchasedAt: expect.any(Date) as Date },
         include: { items: true },
       });
       expect(result.purchasedAt).toBeInstanceOf(Date);
     });
 
     it('passes the category to the transaction request', async () => {
-      prismaMock.shoppingList.findFirst.mockResolvedValue(listMock);
+      prismaTxMock.shoppingList.findFirst.mockResolvedValue(listMock);
+      prismaTxMock.shoppingList.updateMany.mockResolvedValue({ count: 1 });
+      prismaTxMock.category.findFirst.mockResolvedValue({
+        id: 'cat-1',
+        tenantId: 'tenant-1',
+      });
       eventEmitterMock.emitAsync.mockResolvedValue([transactionMock]);
       prismaTxMock.shoppingListItem.deleteMany.mockResolvedValue({ count: 1 });
-      prismaTxMock.shoppingList.update.mockResolvedValue({
-        ...listMock,
-        purchasedAt: new Date(),
-      });
+      prismaTxMock.shoppingList.findUniqueOrThrow.mockResolvedValue(
+        purchasedList,
+      );
 
       await service.purchase('user-1', 'tenant-1', 'list-1', {
         accountId: 'account-1',
         categoryId: 'cat-1',
       });
 
+      expect(prismaTxMock.category.findFirst).toHaveBeenCalledWith({
+        where: { id: 'cat-1', tenantId: 'tenant-1' },
+      });
       expect(eventEmitterMock.emitAsync).toHaveBeenCalledWith(
         TRANSACTION_REQUESTED_EVENT,
         {
@@ -413,46 +472,55 @@ describe('ShoppingListsService', () => {
     });
 
     it('throws BadRequestException when the list is already purchased', async () => {
-      prismaMock.shoppingList.findFirst.mockResolvedValue({
+      prismaTxMock.shoppingList.findFirst.mockResolvedValue({
         ...listMock,
         purchasedAt: new Date(),
       });
+      prismaTxMock.shoppingList.updateMany.mockResolvedValue({ count: 0 });
 
       await expect(
         service.purchase('user-1', 'tenant-1', 'list-1', {
           accountId: 'account-1',
         }),
       ).rejects.toBeInstanceOf(BadRequestException);
+
+      expect(eventEmitterMock.emitAsync).not.toHaveBeenCalled();
     });
 
     it('throws BadRequestException when no items are marked as purchased', async () => {
-      prismaMock.shoppingList.findFirst.mockResolvedValue({
+      prismaTxMock.shoppingList.findFirst.mockResolvedValue({
         ...listMock,
         items: [{ ...listMock.items[1] }],
       });
+      prismaTxMock.shoppingList.updateMany.mockResolvedValue({ count: 1 });
 
       await expect(
         service.purchase('user-1', 'tenant-1', 'list-1', {
           accountId: 'account-1',
         }),
       ).rejects.toBeInstanceOf(BadRequestException);
+
+      expect(eventEmitterMock.emitAsync).not.toHaveBeenCalled();
     });
 
     it('throws BadRequestException when the total is zero', async () => {
-      prismaMock.shoppingList.findFirst.mockResolvedValue({
+      prismaTxMock.shoppingList.findFirst.mockResolvedValue({
         ...listMock,
         items: [{ ...listMock.items[0], price: 0 }],
       });
+      prismaTxMock.shoppingList.updateMany.mockResolvedValue({ count: 1 });
 
       await expect(
         service.purchase('user-1', 'tenant-1', 'list-1', {
           accountId: 'account-1',
         }),
       ).rejects.toBeInstanceOf(BadRequestException);
+
+      expect(eventEmitterMock.emitAsync).not.toHaveBeenCalled();
     });
 
     it('throws NotFoundException when the list is not found', async () => {
-      prismaMock.shoppingList.findFirst.mockResolvedValue(null);
+      prismaTxMock.shoppingList.findFirst.mockResolvedValue(null);
 
       await expect(
         service.purchase('user-1', 'tenant-1', 'list-other', {

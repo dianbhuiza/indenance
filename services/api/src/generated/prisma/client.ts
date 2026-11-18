@@ -99,3 +99,13 @@ export type ShoppingList = Prisma.ShoppingListModel
  * 
  */
 export type ShoppingListItem = Prisma.ShoppingListItemModel
+/**
+ * Model Loan
+ * 
+ */
+export type Loan = Prisma.LoanModel
+/**
+ * Model LoanInstallment
+ * 
+ */
+export type LoanInstallment = Prisma.LoanInstallmentModel

@@ -59,4 +59,12 @@ export class AppConfig {
   get plannedTxCron(): string {
     return this.config.get<string>('PLANNED_TX_CRON') ?? '0 * * * *';
   }
+
+  get adminEmails(): string[] {
+    const raw = this.config.get<string>('ADMIN_EMAILS') ?? '';
+    return raw
+      .split(',')
+      .map((email) => email.trim().toLowerCase())
+      .filter((email) => email.length > 0);
+  }
 }

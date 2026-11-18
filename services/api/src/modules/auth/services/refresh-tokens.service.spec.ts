@@ -6,14 +6,21 @@ import { RefreshTokensService } from './refresh-tokens.service';
 
 describe('RefreshTokensService', () => {
   let service: RefreshTokensService;
+
+  const refreshTokenMock = {
+    findUnique: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    updateMany: jest.fn(),
+  };
+
   const prismaMock = {
-    refreshToken: {
-      findUnique: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-      updateMany: jest.fn(),
-    },
-    $transaction: jest.fn(),
+    $transaction: jest.fn(
+      (
+        fn: (tx: { refreshToken: typeof refreshTokenMock }) => Promise<unknown>,
+      ) => fn({ refreshToken: refreshTokenMock }),
+    ),
+    refreshToken: refreshTokenMock,
   };
 
   const configMock = {
@@ -71,7 +78,8 @@ describe('RefreshTokensService', () => {
   describe('rotate', () => {
     it('revokes the old token and issues a new one', async () => {
       prismaMock.refreshToken.findUnique.mockResolvedValue(storedTokenMock);
-      prismaMock.$transaction.mockResolvedValue([]);
+      prismaMock.refreshToken.update.mockResolvedValue({ id: 'rt-1' });
+      prismaMock.refreshToken.create.mockResolvedValue({ id: 'rt-2' });
 
       const result = await service.rotate('refresh-token');
 

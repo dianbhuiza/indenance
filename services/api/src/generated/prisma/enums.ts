@@ -9,6 +9,14 @@
 * 🟢 You can import this file directly.
 */
 
+export const Role = {
+  USER: 'USER',
+  ADMIN: 'ADMIN'
+} as const
+
+export type Role = (typeof Role)[keyof typeof Role]
+
+
 export const TransactionType = {
   INCOME: 'INCOME',
   EXPENSE: 'EXPENSE'
@@ -42,3 +50,20 @@ export const PlannedTransactionAlertStatus = {
 } as const
 
 export type PlannedTransactionAlertStatus = (typeof PlannedTransactionAlertStatus)[keyof typeof PlannedTransactionAlertStatus]
+
+
+export const LoanStatus = {
+  ACTIVE: 'ACTIVE',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type LoanStatus = (typeof LoanStatus)[keyof typeof LoanStatus]
+
+
+export const LoanInstallmentStatus = {
+  PENDING: 'PENDING',
+  PAID: 'PAID'
+} as const
+
+export type LoanInstallmentStatus = (typeof LoanInstallmentStatus)[keyof typeof LoanInstallmentStatus]

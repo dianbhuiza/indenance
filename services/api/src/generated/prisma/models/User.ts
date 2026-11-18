@@ -30,6 +30,9 @@ export type UserMinAggregateOutputType = {
   name: string | null
   phone: string | null
   emailVerifiedAt: Date | null
+  role: $Enums.Role | null
+  passwordResetTokenHash: string | null
+  passwordResetExpiresAt: Date | null
   tenantId: string | null
 }
 
@@ -39,6 +42,9 @@ export type UserMaxAggregateOutputType = {
   name: string | null
   phone: string | null
   emailVerifiedAt: Date | null
+  role: $Enums.Role | null
+  passwordResetTokenHash: string | null
+  passwordResetExpiresAt: Date | null
   tenantId: string | null
 }
 
@@ -48,6 +54,9 @@ export type UserCountAggregateOutputType = {
   name: number
   phone: number
   emailVerifiedAt: number
+  role: number
+  passwordResetTokenHash: number
+  passwordResetExpiresAt: number
   tenantId: number
   _all: number
 }
@@ -59,6 +68,9 @@ export type UserMinAggregateInputType = {
   name?: true
   phone?: true
   emailVerifiedAt?: true
+  role?: true
+  passwordResetTokenHash?: true
+  passwordResetExpiresAt?: true
   tenantId?: true
 }
 
@@ -68,6 +80,9 @@ export type UserMaxAggregateInputType = {
   name?: true
   phone?: true
   emailVerifiedAt?: true
+  role?: true
+  passwordResetTokenHash?: true
+  passwordResetExpiresAt?: true
   tenantId?: true
 }
 
@@ -77,6 +92,9 @@ export type UserCountAggregateInputType = {
   name?: true
   phone?: true
   emailVerifiedAt?: true
+  role?: true
+  passwordResetTokenHash?: true
+  passwordResetExpiresAt?: true
   tenantId?: true
   _all?: true
 }
@@ -159,6 +177,9 @@ export type UserGroupByOutputType = {
   name: string | null
   phone: string | null
   emailVerifiedAt: Date | null
+  role: $Enums.Role
+  passwordResetTokenHash: string | null
+  passwordResetExpiresAt: Date | null
   tenantId: string | null
   _count: UserCountAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
@@ -189,6 +210,9 @@ export type UserWhereInput = {
   name?: Prisma.StringNullableFilter<"User"> | string | null
   phone?: Prisma.StringNullableFilter<"User"> | string | null
   emailVerifiedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
+  passwordResetTokenHash?: Prisma.StringNullableFilter<"User"> | string | null
+  passwordResetExpiresAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   tenantId?: Prisma.StringNullableFilter<"User"> | string | null
   accounts?: Prisma.AccountListRelationFilter
   tenant?: Prisma.XOR<Prisma.TenantNullableScalarRelationFilter, Prisma.TenantWhereInput> | null
@@ -202,6 +226,9 @@ export type UserOrderByWithRelationInput = {
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
   emailVerifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  role?: Prisma.SortOrder
+  passwordResetTokenHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  passwordResetExpiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   tenantId?: Prisma.SortOrderInput | Prisma.SortOrder
   accounts?: Prisma.AccountOrderByRelationAggregateInput
   tenant?: Prisma.TenantOrderByWithRelationInput
@@ -212,18 +239,21 @@ export type UserOrderByWithRelationInput = {
 export type UserWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   email?: string
+  passwordResetTokenHash?: string
   AND?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   OR?: Prisma.UserWhereInput[]
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   name?: Prisma.StringNullableFilter<"User"> | string | null
   phone?: Prisma.StringNullableFilter<"User"> | string | null
   emailVerifiedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
+  passwordResetExpiresAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   tenantId?: Prisma.StringNullableFilter<"User"> | string | null
   accounts?: Prisma.AccountListRelationFilter
   tenant?: Prisma.XOR<Prisma.TenantNullableScalarRelationFilter, Prisma.TenantWhereInput> | null
   authMethods?: Prisma.AuthMethodListRelationFilter
   refreshTokens?: Prisma.RefreshTokenListRelationFilter
-}, "id" | "email">
+}, "id" | "email" | "passwordResetTokenHash">
 
 export type UserOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -231,6 +261,9 @@ export type UserOrderByWithAggregationInput = {
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
   emailVerifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  role?: Prisma.SortOrder
+  passwordResetTokenHash?: Prisma.SortOrderInput | Prisma.SortOrder
+  passwordResetExpiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   tenantId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
@@ -246,6 +279,9 @@ export type UserScalarWhereWithAggregatesInput = {
   name?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   phone?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   emailVerifiedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+  role?: Prisma.EnumRoleWithAggregatesFilter<"User"> | $Enums.Role
+  passwordResetTokenHash?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  passwordResetExpiresAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
   tenantId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
 }
 
@@ -255,6 +291,9 @@ export type UserCreateInput = {
   name?: string | null
   phone?: string | null
   emailVerifiedAt?: Date | string | null
+  role?: $Enums.Role
+  passwordResetTokenHash?: string | null
+  passwordResetExpiresAt?: Date | string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   tenant?: Prisma.TenantCreateNestedOneWithoutUsersInput
   authMethods?: Prisma.AuthMethodCreateNestedManyWithoutUserInput
@@ -267,6 +306,9 @@ export type UserUncheckedCreateInput = {
   name?: string | null
   phone?: string | null
   emailVerifiedAt?: Date | string | null
+  role?: $Enums.Role
+  passwordResetTokenHash?: string | null
+  passwordResetExpiresAt?: Date | string | null
   tenantId?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   authMethods?: Prisma.AuthMethodUncheckedCreateNestedManyWithoutUserInput
@@ -279,6 +321,9 @@ export type UserUpdateInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  passwordResetTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   tenant?: Prisma.TenantUpdateOneWithoutUsersNestedInput
   authMethods?: Prisma.AuthMethodUpdateManyWithoutUserNestedInput
@@ -291,6 +336,9 @@ export type UserUncheckedUpdateInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  passwordResetTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   authMethods?: Prisma.AuthMethodUncheckedUpdateManyWithoutUserNestedInput
@@ -303,6 +351,9 @@ export type UserCreateManyInput = {
   name?: string | null
   phone?: string | null
   emailVerifiedAt?: Date | string | null
+  role?: $Enums.Role
+  passwordResetTokenHash?: string | null
+  passwordResetExpiresAt?: Date | string | null
   tenantId?: string | null
 }
 
@@ -312,6 +363,9 @@ export type UserUpdateManyMutationInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  passwordResetTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type UserUncheckedUpdateManyInput = {
@@ -320,6 +374,9 @@ export type UserUncheckedUpdateManyInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  passwordResetTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -329,6 +386,9 @@ export type UserCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   emailVerifiedAt?: Prisma.SortOrder
+  role?: Prisma.SortOrder
+  passwordResetTokenHash?: Prisma.SortOrder
+  passwordResetExpiresAt?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
 }
 
@@ -338,6 +398,9 @@ export type UserMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   emailVerifiedAt?: Prisma.SortOrder
+  role?: Prisma.SortOrder
+  passwordResetTokenHash?: Prisma.SortOrder
+  passwordResetExpiresAt?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
 }
 
@@ -347,6 +410,9 @@ export type UserMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   phone?: Prisma.SortOrder
   emailVerifiedAt?: Prisma.SortOrder
+  role?: Prisma.SortOrder
+  passwordResetTokenHash?: Prisma.SortOrder
+  passwordResetExpiresAt?: Prisma.SortOrder
   tenantId?: Prisma.SortOrder
 }
 
@@ -375,6 +441,10 @@ export type NullableStringFieldUpdateOperationsInput = {
 
 export type NullableDateTimeFieldUpdateOperationsInput = {
   set?: Date | string | null
+}
+
+export type EnumRoleFieldUpdateOperationsInput = {
+  set?: $Enums.Role
 }
 
 export type UserCreateNestedOneWithoutRefreshTokensInput = {
@@ -467,6 +537,9 @@ export type UserCreateWithoutRefreshTokensInput = {
   name?: string | null
   phone?: string | null
   emailVerifiedAt?: Date | string | null
+  role?: $Enums.Role
+  passwordResetTokenHash?: string | null
+  passwordResetExpiresAt?: Date | string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   tenant?: Prisma.TenantCreateNestedOneWithoutUsersInput
   authMethods?: Prisma.AuthMethodCreateNestedManyWithoutUserInput
@@ -478,6 +551,9 @@ export type UserUncheckedCreateWithoutRefreshTokensInput = {
   name?: string | null
   phone?: string | null
   emailVerifiedAt?: Date | string | null
+  role?: $Enums.Role
+  passwordResetTokenHash?: string | null
+  passwordResetExpiresAt?: Date | string | null
   tenantId?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   authMethods?: Prisma.AuthMethodUncheckedCreateNestedManyWithoutUserInput
@@ -505,6 +581,9 @@ export type UserUpdateWithoutRefreshTokensInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  passwordResetTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   tenant?: Prisma.TenantUpdateOneWithoutUsersNestedInput
   authMethods?: Prisma.AuthMethodUpdateManyWithoutUserNestedInput
@@ -516,6 +595,9 @@ export type UserUncheckedUpdateWithoutRefreshTokensInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  passwordResetTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   authMethods?: Prisma.AuthMethodUncheckedUpdateManyWithoutUserNestedInput
@@ -527,6 +609,9 @@ export type UserCreateWithoutAuthMethodsInput = {
   name?: string | null
   phone?: string | null
   emailVerifiedAt?: Date | string | null
+  role?: $Enums.Role
+  passwordResetTokenHash?: string | null
+  passwordResetExpiresAt?: Date | string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   tenant?: Prisma.TenantCreateNestedOneWithoutUsersInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
@@ -538,6 +623,9 @@ export type UserUncheckedCreateWithoutAuthMethodsInput = {
   name?: string | null
   phone?: string | null
   emailVerifiedAt?: Date | string | null
+  role?: $Enums.Role
+  passwordResetTokenHash?: string | null
+  passwordResetExpiresAt?: Date | string | null
   tenantId?: string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -565,6 +653,9 @@ export type UserUpdateWithoutAuthMethodsInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  passwordResetTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   tenant?: Prisma.TenantUpdateOneWithoutUsersNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
@@ -576,6 +667,9 @@ export type UserUncheckedUpdateWithoutAuthMethodsInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  passwordResetTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -587,6 +681,9 @@ export type UserCreateWithoutTenantInput = {
   name?: string | null
   phone?: string | null
   emailVerifiedAt?: Date | string | null
+  role?: $Enums.Role
+  passwordResetTokenHash?: string | null
+  passwordResetExpiresAt?: Date | string | null
   accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
   authMethods?: Prisma.AuthMethodCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
@@ -598,6 +695,9 @@ export type UserUncheckedCreateWithoutTenantInput = {
   name?: string | null
   phone?: string | null
   emailVerifiedAt?: Date | string | null
+  role?: $Enums.Role
+  passwordResetTokenHash?: string | null
+  passwordResetExpiresAt?: Date | string | null
   accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
   authMethods?: Prisma.AuthMethodUncheckedCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -638,6 +738,9 @@ export type UserScalarWhereInput = {
   name?: Prisma.StringNullableFilter<"User"> | string | null
   phone?: Prisma.StringNullableFilter<"User"> | string | null
   emailVerifiedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  role?: Prisma.EnumRoleFilter<"User"> | $Enums.Role
+  passwordResetTokenHash?: Prisma.StringNullableFilter<"User"> | string | null
+  passwordResetExpiresAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
   tenantId?: Prisma.StringNullableFilter<"User"> | string | null
 }
 
@@ -647,6 +750,9 @@ export type UserCreateWithoutAccountsInput = {
   name?: string | null
   phone?: string | null
   emailVerifiedAt?: Date | string | null
+  role?: $Enums.Role
+  passwordResetTokenHash?: string | null
+  passwordResetExpiresAt?: Date | string | null
   tenant?: Prisma.TenantCreateNestedOneWithoutUsersInput
   authMethods?: Prisma.AuthMethodCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutUserInput
@@ -658,6 +764,9 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   name?: string | null
   phone?: string | null
   emailVerifiedAt?: Date | string | null
+  role?: $Enums.Role
+  passwordResetTokenHash?: string | null
+  passwordResetExpiresAt?: Date | string | null
   tenantId?: string | null
   authMethods?: Prisma.AuthMethodUncheckedCreateNestedManyWithoutUserInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -685,6 +794,9 @@ export type UserUpdateWithoutAccountsInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  passwordResetTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenant?: Prisma.TenantUpdateOneWithoutUsersNestedInput
   authMethods?: Prisma.AuthMethodUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
@@ -696,6 +808,9 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  passwordResetTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   authMethods?: Prisma.AuthMethodUncheckedUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -707,6 +822,9 @@ export type UserCreateManyTenantInput = {
   name?: string | null
   phone?: string | null
   emailVerifiedAt?: Date | string | null
+  role?: $Enums.Role
+  passwordResetTokenHash?: string | null
+  passwordResetExpiresAt?: Date | string | null
 }
 
 export type UserUpdateWithoutTenantInput = {
@@ -715,6 +833,9 @@ export type UserUpdateWithoutTenantInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  passwordResetTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
   authMethods?: Prisma.AuthMethodUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutUserNestedInput
@@ -726,6 +847,9 @@ export type UserUncheckedUpdateWithoutTenantInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  passwordResetTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
   authMethods?: Prisma.AuthMethodUncheckedUpdateManyWithoutUserNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -737,6 +861,9 @@ export type UserUncheckedUpdateManyWithoutTenantInput = {
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  passwordResetTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordResetExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -794,6 +921,9 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   name?: boolean
   phone?: boolean
   emailVerifiedAt?: boolean
+  role?: boolean
+  passwordResetTokenHash?: boolean
+  passwordResetExpiresAt?: boolean
   tenantId?: boolean
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
   tenant?: boolean | Prisma.User$tenantArgs<ExtArgs>
@@ -808,6 +938,9 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   name?: boolean
   phone?: boolean
   emailVerifiedAt?: boolean
+  role?: boolean
+  passwordResetTokenHash?: boolean
+  passwordResetExpiresAt?: boolean
   tenantId?: boolean
   tenant?: boolean | Prisma.User$tenantArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
@@ -818,6 +951,9 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   name?: boolean
   phone?: boolean
   emailVerifiedAt?: boolean
+  role?: boolean
+  passwordResetTokenHash?: boolean
+  passwordResetExpiresAt?: boolean
   tenantId?: boolean
   tenant?: boolean | Prisma.User$tenantArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
@@ -828,10 +964,13 @@ export type UserSelectScalar = {
   name?: boolean
   phone?: boolean
   emailVerifiedAt?: boolean
+  role?: boolean
+  passwordResetTokenHash?: boolean
+  passwordResetExpiresAt?: boolean
   tenantId?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "phone" | "emailVerifiedAt" | "tenantId", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "phone" | "emailVerifiedAt" | "role" | "passwordResetTokenHash" | "passwordResetExpiresAt" | "tenantId", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   accounts?: boolean | Prisma.User$accountsArgs<ExtArgs>
   tenant?: boolean | Prisma.User$tenantArgs<ExtArgs>
@@ -860,6 +999,9 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     name: string | null
     phone: string | null
     emailVerifiedAt: Date | null
+    role: $Enums.Role
+    passwordResetTokenHash: string | null
+    passwordResetExpiresAt: Date | null
     tenantId: string | null
   }, ExtArgs["result"]["user"]>
   composites: {}
@@ -1293,6 +1435,9 @@ export interface UserFieldRefs {
   readonly name: Prisma.FieldRef<"User", 'String'>
   readonly phone: Prisma.FieldRef<"User", 'String'>
   readonly emailVerifiedAt: Prisma.FieldRef<"User", 'DateTime'>
+  readonly role: Prisma.FieldRef<"User", 'Role'>
+  readonly passwordResetTokenHash: Prisma.FieldRef<"User", 'String'>
+  readonly passwordResetExpiresAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly tenantId: Prisma.FieldRef<"User", 'String'>
 }
     

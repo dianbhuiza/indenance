@@ -1,5 +1,5 @@
 import { Target } from 'lucide-react';
-import { useBudgetsQuery } from '@/hooks/use-budgets';
+import { useBudgetsQuery, computeBudgetProgress, formatNumber } from '@indenance/core';
 import { Button } from '@/components/ui';
 
 const colorMap = {
@@ -66,8 +66,7 @@ export function BudgetProgress({ onCreateBudget }: BudgetProgressProps) {
 
       <div className="space-y-4">
         {budgets.map((budget, i) => {
-          const pct = budget.amount > 0 ? Math.min((budget.spent / budget.amount) * 100, 100) : 0;
-          const isOver = budget.isExceeded;
+          const { pct, isOver } = computeBudgetProgress(budget);
           const colors = colorMap[COLORS[i % COLORS.length]];
 
           return (
@@ -75,7 +74,7 @@ export function BudgetProgress({ onCreateBudget }: BudgetProgressProps) {
               <div className="mb-1.5 flex items-center justify-between">
                 <span className="text-sm font-medium text-text">{budget.name}</span>
                 <span className={`text-xs font-medium ${isOver ? 'text-danger-600' : 'text-text-secondary'}`}>
-                  ${budget.spent.toLocaleString('es-MX')} / ${budget.amount.toLocaleString('es-MX')}
+                  ${formatNumber(budget.spent)} / ${formatNumber(budget.amount)}
                 </span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-surface-raised">

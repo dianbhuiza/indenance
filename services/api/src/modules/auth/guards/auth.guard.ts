@@ -17,6 +17,7 @@ export interface JwtPayload {
   sub: string;
   provider: string;
   tenantId?: string | null;
+  purpose?: string;
 }
 
 @Injectable()
@@ -42,6 +43,10 @@ export class AuthGuard implements CanActivate {
     try {
       payload = await this.jwtService.verifyAsync<JwtPayload>(token);
     } catch {
+      throw new UnauthorizedException('Invalid auth token');
+    }
+
+    if (payload.purpose !== 'access') {
       throw new UnauthorizedException('Invalid auth token');
     }
 

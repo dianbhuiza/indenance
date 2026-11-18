@@ -1,24 +1,5 @@
-import { useTransactionsQuery } from '@/hooks/use-transactions';
+import { useTransactionsQuery, getCategoryIcon, UNASSIGNED_CATEGORY, formatAmount, formatDayMonth } from '@indenance/core';
 import { ArrowRight } from 'lucide-react';
-
-const CATEGORY_ICONS: Record<string, string> = {
-  Alimentación: '🛒',
-  Transporte: '🚗',
-  Entretenimiento: '🎬',
-  Salud: '💊',
-  Servicios: '📱',
-  Educación: '📚',
-  Hogar: '🏠',
-  Otros: '📌',
-  Salario: '💰',
-  Freelance: '💻',
-  'Sin categoría': '📌',
-};
-
-function getFormattedDate(dateStr: string): string {
-  const d = new Date(dateStr);
-  return `${d.getDate()}/${d.getMonth() + 1}`;
-}
 
 export function RecentTransactions() {
   const { transactions } = useTransactionsQuery();
@@ -48,7 +29,7 @@ export function RecentTransactions() {
 
       <div className="space-y-1">
         {recent.map((tx, i) => {
-          const icon = CATEGORY_ICONS[tx.category?.name ?? 'Sin categoría'] ?? '📌';
+          const icon = getCategoryIcon(tx.category?.name);
           return (
             <div
               key={tx.id}
@@ -59,12 +40,12 @@ export function RecentTransactions() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="truncate text-sm font-medium text-text">
-                  {tx.category?.name ?? 'Sin categoría'}
+                  {tx.category?.name ?? UNASSIGNED_CATEGORY}
                 </p>
                 <div className="flex items-center gap-1.5">
                   <p className="text-xs text-text-muted">{tx.account.name}</p>
                   <span className="text-[10px] text-text-muted">·</span>
-                  <p className="text-xs text-text-muted">{getFormattedDate(tx.createdAt)}</p>
+                  <p className="text-xs text-text-muted">{formatDayMonth(tx.createdAt)}</p>
                 </div>
               </div>
               <div className="text-right">
@@ -73,7 +54,7 @@ export function RecentTransactions() {
                     tx.type === 'INCOME' ? 'text-success-600' : 'text-text'
                   }`}
                 >
-                  {tx.type === 'INCOME' ? '+' : '-'}${tx.amount.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                  {tx.type === 'INCOME' ? '+' : '-'}${formatAmount(tx.amount)}
                 </p>
                 <p className="text-[10px] text-text-muted">{tx.account.currency}</p>
               </div>

@@ -1,33 +1,6 @@
 import { useState, useMemo } from 'react';
-import { useAccountsQuery } from '@/stores/accounts.store';
-import { useTransactionsQuery, type Transaction } from '@/hooks/use-transactions';
+import { useAccountsQuery, useTransactionsQuery, computeMonthlySpending, formatCompactAmount } from '@indenance/core';
 import { Select } from '@/components/ui';
-
-function getMonthLabel(date: Date): string {
-  return date.toLocaleDateString('es-MX', { month: 'short' }).replace('.', '');
-}
-
-function getMonthKey(date: Date): string {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-}
-
-function computeMonthlySpending(transactions: Transaction[]) {
-  const months = [2, 1, 0].map((offset) => {
-    const now = new Date();
-    const d = new Date(now.getFullYear(), now.getMonth() - offset, 1);
-    return { label: getMonthLabel(d), key: getMonthKey(d) };
-  });
-
-  return months.map(({ label, key }) => {
-    const amount = transactions
-      .filter((t) => {
-        const d = new Date(t.createdAt);
-        return getMonthKey(d) === key && t.type === 'EXPENSE';
-      })
-      .reduce((sum, t) => sum + t.amount, 0);
-    return { month: label, amount };
-  });
-}
 
 export function SpendingChart() {
   const { data: accounts = [] } = useAccountsQuery();
@@ -84,9 +57,7 @@ export function SpendingChart() {
           return (
             <div key={month.month} className="flex flex-1 flex-col items-center gap-2">
               <span className="text-xs font-medium text-text-secondary">
-                {month.amount > 0
-                  ? `$${(month.amount / 1000).toFixed(1)}k`
-                  : '$0'}
+                {formatCompactAmount(month.amount)}
               </span>
               <div className="relative w-full" style={{ height: 100 }}>
                 <div

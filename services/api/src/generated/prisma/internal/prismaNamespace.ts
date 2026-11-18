@@ -408,7 +408,9 @@ export const ModelName = {
   PlannedTransaction: 'PlannedTransaction',
   PlannedTransactionAlert: 'PlannedTransactionAlert',
   ShoppingList: 'ShoppingList',
-  ShoppingListItem: 'ShoppingListItem'
+  ShoppingListItem: 'ShoppingListItem',
+  Loan: 'Loan',
+  LoanInstallment: 'LoanInstallment'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -424,7 +426,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "refreshToken" | "authMethod" | "tenant" | "account" | "transaction" | "category" | "budget" | "plannedTransaction" | "plannedTransactionAlert" | "shoppingList" | "shoppingListItem"
+    modelProps: "user" | "refreshToken" | "authMethod" | "tenant" | "account" | "transaction" | "category" | "budget" | "plannedTransaction" | "plannedTransactionAlert" | "shoppingList" | "shoppingListItem" | "loan" | "loanInstallment"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1316,6 +1318,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Loan: {
+      payload: Prisma.$LoanPayload<ExtArgs>
+      fields: Prisma.LoanFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LoanFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LoanFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanPayload>
+        }
+        findFirst: {
+          args: Prisma.LoanFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LoanFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanPayload>
+        }
+        findMany: {
+          args: Prisma.LoanFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanPayload>[]
+        }
+        create: {
+          args: Prisma.LoanCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanPayload>
+        }
+        createMany: {
+          args: Prisma.LoanCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LoanCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanPayload>[]
+        }
+        delete: {
+          args: Prisma.LoanDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanPayload>
+        }
+        update: {
+          args: Prisma.LoanUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanPayload>
+        }
+        deleteMany: {
+          args: Prisma.LoanDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LoanUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LoanUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanPayload>[]
+        }
+        upsert: {
+          args: Prisma.LoanUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanPayload>
+        }
+        aggregate: {
+          args: Prisma.LoanAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLoan>
+        }
+        groupBy: {
+          args: Prisma.LoanGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LoanGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LoanCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LoanCountAggregateOutputType> | number
+        }
+      }
+    }
+    LoanInstallment: {
+      payload: Prisma.$LoanInstallmentPayload<ExtArgs>
+      fields: Prisma.LoanInstallmentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.LoanInstallmentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanInstallmentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.LoanInstallmentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanInstallmentPayload>
+        }
+        findFirst: {
+          args: Prisma.LoanInstallmentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanInstallmentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.LoanInstallmentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanInstallmentPayload>
+        }
+        findMany: {
+          args: Prisma.LoanInstallmentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanInstallmentPayload>[]
+        }
+        create: {
+          args: Prisma.LoanInstallmentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanInstallmentPayload>
+        }
+        createMany: {
+          args: Prisma.LoanInstallmentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.LoanInstallmentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanInstallmentPayload>[]
+        }
+        delete: {
+          args: Prisma.LoanInstallmentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanInstallmentPayload>
+        }
+        update: {
+          args: Prisma.LoanInstallmentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanInstallmentPayload>
+        }
+        deleteMany: {
+          args: Prisma.LoanInstallmentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.LoanInstallmentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.LoanInstallmentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanInstallmentPayload>[]
+        }
+        upsert: {
+          args: Prisma.LoanInstallmentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$LoanInstallmentPayload>
+        }
+        aggregate: {
+          args: Prisma.LoanInstallmentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateLoanInstallment>
+        }
+        groupBy: {
+          args: Prisma.LoanInstallmentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LoanInstallmentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.LoanInstallmentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.LoanInstallmentCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1361,6 +1511,9 @@ export const UserScalarFieldEnum = {
   name: 'name',
   phone: 'phone',
   emailVerifiedAt: 'emailVerifiedAt',
+  role: 'role',
+  passwordResetTokenHash: 'passwordResetTokenHash',
+  passwordResetExpiresAt: 'passwordResetExpiresAt',
   tenantId: 'tenantId'
 } as const
 
@@ -1465,7 +1618,11 @@ export const PlannedTransactionScalarFieldEnum = {
   categoryId: 'categoryId',
   tenantId: 'tenantId',
   deletedAt: 'deletedAt',
-  status: 'status'
+  status: 'status',
+  requiresApproval: 'requiresApproval',
+  occurrences: 'occurrences',
+  completedOccurrences: 'completedOccurrences',
+  loanId: 'loanId'
 } as const
 
 export type PlannedTransactionScalarFieldEnum = (typeof PlannedTransactionScalarFieldEnum)[keyof typeof PlannedTransactionScalarFieldEnum]
@@ -1482,6 +1639,7 @@ export const PlannedTransactionAlertScalarFieldEnum = {
   dueAt: 'dueAt',
   status: 'status',
   transactionId: 'transactionId',
+  loanInstallmentId: 'loanInstallmentId',
   createdAt: 'createdAt',
   resolvedAt: 'resolvedAt'
 } as const
@@ -1511,6 +1669,42 @@ export const ShoppingListItemScalarFieldEnum = {
 } as const
 
 export type ShoppingListItemScalarFieldEnum = (typeof ShoppingListItemScalarFieldEnum)[keyof typeof ShoppingListItemScalarFieldEnum]
+
+
+export const LoanScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  accountId: 'accountId',
+  tenantId: 'tenantId',
+  principal: 'principal',
+  interestPercent: 'interestPercent',
+  totalRepayment: 'totalRepayment',
+  interestAmount: 'interestAmount',
+  installments: 'installments',
+  installmentAmount: 'installmentAmount',
+  interval: 'interval',
+  startDate: 'startDate',
+  status: 'status',
+  deletedAt: 'deletedAt',
+  createdAt: 'createdAt',
+  categoryId: 'categoryId'
+} as const
+
+export type LoanScalarFieldEnum = (typeof LoanScalarFieldEnum)[keyof typeof LoanScalarFieldEnum]
+
+
+export const LoanInstallmentScalarFieldEnum = {
+  id: 'id',
+  loanId: 'loanId',
+  number: 'number',
+  dueAt: 'dueAt',
+  amount: 'amount',
+  status: 'status',
+  paidAt: 'paidAt',
+  transactionId: 'transactionId'
+} as const
+
+export type LoanInstallmentScalarFieldEnum = (typeof LoanInstallmentScalarFieldEnum)[keyof typeof LoanInstallmentScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1568,6 +1762,20 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
  * Reference to a field of type 'DateTime[]'
  */
 export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Role'
+ */
+export type EnumRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Role'>
+    
+
+
+/**
+ * Reference to a field of type 'Role[]'
+ */
+export type ListEnumRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Role[]'>
     
 
 
@@ -1659,6 +1867,34 @@ export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, '
  * Reference to a field of type 'Float[]'
  */
 export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+/**
+ * Reference to a field of type 'LoanStatus'
+ */
+export type EnumLoanStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LoanStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'LoanStatus[]'
+ */
+export type ListEnumLoanStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LoanStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'LoanInstallmentStatus'
+ */
+export type EnumLoanInstallmentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LoanInstallmentStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'LoanInstallmentStatus[]'
+ */
+export type ListEnumLoanInstallmentStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LoanInstallmentStatus[]'>
     
 
 /**
@@ -1824,6 +2060,8 @@ export type GlobalOmitConfig = {
   plannedTransactionAlert?: Prisma.PlannedTransactionAlertOmit
   shoppingList?: Prisma.ShoppingListOmit
   shoppingListItem?: Prisma.ShoppingListItemOmit
+  loan?: Prisma.LoanOmit
+  loanInstallment?: Prisma.LoanInstallmentOmit
 }
 
 /* Types for Logging */

@@ -7,26 +7,47 @@ export interface BudgetPeriod {
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+/**
+ * Window the budget is measured against. Non recurring budgets run from
+ * `startDate` up to `endDate` (null meaning "open ended"), recurring budgets
+ * return the period containing `now`, clamped so it never extends past
+ * `endDate`.
+ */
 export function budgetPeriod(
   now: Date,
   startDate: Date,
   interval: Interval | null,
+  endDate: Date | null = null,
 ): BudgetPeriod {
   if (!interval) {
-    return { start: startDate, end: null };
+    return { start: startDate, end: endDate };
   }
 
-  const delta =
+  const effectiveNow =
+    endDate && now.getTime() > endDate.getTime()
+      ? new Date(endDate.getTime() - 1)
+      : now;
+
+  const rawDelta =
     interval === 'DAILY'
-      ? utcCalendarDays(now) - utcCalendarDays(startDate)
+      ? utcCalendarDays(effectiveNow) - utcCalendarDays(startDate)
       : interval === 'WEEKLY'
-        ? Math.floor((utcCalendarDays(now) - utcCalendarDays(startDate)) / 7)
+        ? Math.floor(
+            (utcCalendarDays(effectiveNow) - utcCalendarDays(startDate)) / 7,
+          )
         : interval === 'MONTHLY'
-          ? utcMonths(now) - utcMonths(startDate)
-          : utcYears(now) - utcYears(startDate);
+          ? utcMonths(effectiveNow) - utcMonths(startDate)
+          : utcYears(effectiveNow) - utcYears(startDate);
+
+  // Never look at a period before the budget starts.
+  const delta = Math.max(0, rawDelta);
 
   const start = advanceUtc(startDate, interval, delta);
-  return { start, end: advanceUtc(start, interval, 1) };
+  const periodEnd = advanceUtc(start, interval, 1);
+  return {
+    start,
+    end: endDate && periodEnd > endDate ? endDate : periodEnd,
+  };
 }
 
 function advanceUtc(date: Date, interval: Interval, steps: number): Date {

@@ -14,6 +14,9 @@ describe('TransactionsService', () => {
       findFirst: jest.fn(),
       update: jest.fn(),
     },
+    category: {
+      findFirst: jest.fn(),
+    },
     transaction: {
       create: jest.fn(),
     },
@@ -122,6 +125,10 @@ describe('TransactionsService', () => {
 
     it('applies budget usage for an expense', async () => {
       txMock.account.findFirst.mockResolvedValue(accountMock);
+      txMock.category.findFirst.mockResolvedValue({
+        id: 'cat-1',
+        tenantId: 'tenant-1',
+      });
       txMock.transaction.create.mockResolvedValue({
         id: 'tx-2',
         accountId: 'account-1',
@@ -138,12 +145,31 @@ describe('TransactionsService', () => {
         categoryId: 'cat-1',
       });
 
+      expect(txMock.category.findFirst).toHaveBeenCalledWith({
+        where: { id: 'cat-1', tenantId: 'tenant-1' },
+      });
       expect(budgetsServiceMock.applyExpense).toHaveBeenCalledWith(
         txMock,
         'tenant-1',
         'cat-1',
         200,
       );
+    });
+
+    it('rejects a category that belongs to another tenant', async () => {
+      txMock.account.findFirst.mockResolvedValue(accountMock);
+      txMock.category.findFirst.mockResolvedValue(null);
+
+      await expect(
+        service.record('user-1', 'tenant-1', {
+          accountId: 'account-1',
+          amount: 200,
+          type: 'EXPENSE',
+          categoryId: 'cat-foreign',
+        }),
+      ).rejects.toBeInstanceOf(NotFoundException);
+
+      expect(txMock.transaction.create).not.toHaveBeenCalled();
     });
 
     it('does not apply budget usage for an income', async () => {

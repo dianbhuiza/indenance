@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import type { Prisma } from '../../generated/prisma/client';
 import { Category } from '../../generated/prisma/client';
 import { assertTenant } from '../shared/assert-tenant';
 import { PrismaService } from '../prisma/prisma.service';
@@ -28,8 +29,12 @@ export class CategoriesService {
     });
   }
 
-  async seedDefaults(tenantId: string): Promise<void> {
-    await this.prisma.category.createMany({
+  async seedDefaults(
+    tenantId: string,
+    db?: Prisma.TransactionClient,
+  ): Promise<void> {
+    const client: Prisma.TransactionClient = db ?? this.prisma;
+    await client.category.createMany({
       data: DEFAULT_CATEGORIES.map((name) => ({ name, tenantId })),
     });
   }

@@ -1,8 +1,10 @@
+import { createHash } from 'node:crypto';
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppConfig } from '../../config/app.config';
 import { MailService } from '../mail/mail.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
@@ -31,9 +33,11 @@ const refreshTokensServiceMock = {
   generate: jest.fn(),
   rotate: jest.fn(),
   revoke: jest.fn(),
+  revokeAllForUser: jest.fn(),
 };
 
 const mailServiceMock = {
+  enabled: true,
   sendVerificationEmail: jest.fn(),
   sendPasswordResetEmail: jest.fn(),
 };
@@ -47,15 +51,44 @@ const credentialsStrategyMock = {
   resetPassword: jest.fn(),
 };
 
-const configMock: AppConfig = {
+const configMock = {
   frontendUrl: 'http://localhost:5173',
-} as unknown as AppConfig;
+  adminEmails: [] as string[],
+};
+
+const prismaTxMock = {
+  user: {
+    create: jest.fn(),
+  },
+};
+
+const prismaMock = {
+  $transaction: jest.fn((fn: (tx: unknown) => Promise<unknown>) =>
+    fn(prismaTxMock),
+  ),
+  user: {
+    findUnique: jest.fn(),
+    updateMany: jest.fn(),
+  },
+};
+
+const hashNonce = (nonce: string) =>
+  createHash('sha256').update(nonce).digest('hex');
+
+const ACCESS_TOKEN = {
+  sub: 'user-1',
+  provider: CREDENTIALS_PROVIDER,
+  tenantId: 'tenant-1',
+  purpose: 'access',
+};
 
 describe('AuthService', () => {
   let service: AuthService;
 
   beforeEach(async () => {
     jest.clearAllMocks();
+    configMock.adminEmails = [];
+    mailServiceMock.enabled = true;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -63,9 +96,13 @@ describe('AuthService', () => {
         { provide: UsersService, useValue: usersServiceMock },
         { provide: TenantsService, useValue: tenantsServiceMock },
         { provide: JwtService, useValue: jwtServiceMock },
-        { provide: AppConfig, useValue: configMock },
+        {
+          provide: AppConfig,
+          useValue: configMock,
+        },
         { provide: MailService, useValue: mailServiceMock },
         { provide: RefreshTokensService, useValue: refreshTokensServiceMock },
+        { provide: PrismaService, useValue: prismaMock },
         {
           provide: AUTH_STRATEGIES,
           useValue: [credentialsStrategyMock],
@@ -80,13 +117,69 @@ describe('AuthService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('register', () => {
-    it('should create the user and send a verification email without issuing an access token', async () => {
-      usersServiceMock.findByEmail.mockResolvedValue(null);
-      usersServiceMock.create.mockResolvedValue({
+  describe('me', () => {
+    it('returns the profile for the current user', async () => {
+      usersServiceMock.findOne.mockResolvedValue({
         id: 'user-1',
         email: 'juan@example.com',
         name: 'Juan',
+        phone: '+34600000000',
+        emailVerifiedAt: new Date('2026-01-01T00:00:00.000Z'),
+        role: 'USER',
+      });
+      tenantsServiceMock.findByUserId.mockResolvedValue({
+        id: 'tenant-1',
+        name: 'Mi hogar',
+      });
+
+      const result = await service.me('user-1');
+
+      expect(usersServiceMock.findOne).toHaveBeenCalledWith('user-1');
+      expect(result).toEqual({
+        id: 'user-1',
+        email: 'juan@example.com',
+        name: 'Juan',
+        phone: '+34600000000',
+        emailVerifiedAt: new Date('2026-01-01T00:00:00.000Z'),
+        role: 'USER',
+        tenant: { id: 'tenant-1', name: 'Mi hogar' },
+      });
+    });
+  });
+
+  describe('updateMe', () => {
+    it('updates the allowed profile fields', async () => {
+      usersServiceMock.update.mockResolvedValue({
+        id: 'user-1',
+        email: 'juan@example.com',
+        name: 'Juan Actualizado',
+        phone: null,
+        emailVerifiedAt: new Date('2026-01-01T00:00:00.000Z'),
+        role: 'USER',
+      });
+      tenantsServiceMock.findByUserId.mockResolvedValue(null);
+
+      const result = await service.updateMe('user-1', {
+        name: 'Juan Actualizado',
+      });
+
+      expect(usersServiceMock.update).toHaveBeenCalledWith('user-1', {
+        name: 'Juan Actualizado',
+      });
+      expect(result.name).toBe('Juan Actualizado');
+      expect(result.tenant).toBeNull();
+      expect(result).not.toHaveProperty('password');
+    });
+  });
+
+  describe('register', () => {
+    it('should create the user and send a verification email without issuing an access token', async () => {
+      usersServiceMock.findByEmail.mockResolvedValue(null);
+      prismaTxMock.user.create.mockResolvedValue({
+        id: 'user-1',
+        email: 'juan@example.com',
+        name: 'Juan',
+        role: 'USER',
         emailVerifiedAt: null,
       });
       tenantsServiceMock.createForUser.mockResolvedValue({ id: 'tenant-1' });
@@ -104,6 +197,29 @@ describe('AuthService', () => {
       });
 
       expect(result).not.toHaveProperty('accessToken');
+      expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);
+      expect(prismaTxMock.user.create).toHaveBeenCalledWith({
+        data: {
+          email: 'juan@example.com',
+          name: 'Juan',
+          phone: undefined,
+          role: 'USER',
+          emailVerifiedAt: null,
+        },
+      });
+      expect(tenantsServiceMock.createForUser).toHaveBeenCalledWith(
+        'user-1',
+        { name: "Juan's home" },
+        prismaTxMock,
+      );
+      expect(credentialsStrategyMock.create).toHaveBeenCalledWith(
+        {
+          userId: 'user-1',
+          providerAccountId: 'juan@example.com',
+          password: 'password123',
+        },
+        prismaTxMock,
+      );
       await new Promise((resolve) => setImmediate(resolve));
       expect(jwtServiceMock.signAsync).toHaveBeenCalledWith(
         { sub: 'user-1', purpose: 'email-verification' },
@@ -116,6 +232,67 @@ describe('AuthService', () => {
           'http://localhost:5173/auth/verify?token=verification-token',
         ),
       );
+    });
+
+    it('auto-verifies the email when the mailer is not configured', async () => {
+      mailServiceMock.enabled = false;
+      usersServiceMock.findByEmail.mockResolvedValue(null);
+      prismaTxMock.user.create.mockResolvedValue({
+        id: 'user-1',
+        email: 'juan@example.com',
+        name: 'Juan',
+        role: 'USER',
+        emailVerifiedAt: new Date(),
+      });
+      tenantsServiceMock.createForUser.mockResolvedValue({ id: 'tenant-1' });
+      credentialsStrategyMock.create.mockResolvedValue({
+        id: 'auth-method-1',
+        provider: CREDENTIALS_PROVIDER,
+      });
+
+      const result = await service.register({
+        email: 'juan@example.com',
+        password: 'password123',
+        name: 'Juan',
+      });
+
+      expect(result).not.toHaveProperty('accessToken');
+      expect(prismaTxMock.user.create).toHaveBeenCalledWith({
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        data: expect.objectContaining({
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          emailVerifiedAt: expect.any(Date),
+        }),
+      });
+      mailServiceMock.enabled = true;
+    });
+
+    it('assigns the admin role to configured admin emails', async () => {
+      configMock.adminEmails = ['admin@example.com'];
+      usersServiceMock.findByEmail.mockResolvedValue(null);
+      prismaTxMock.user.create.mockResolvedValue({
+        id: 'user-9',
+        email: 'admin@example.com',
+        name: 'Admin',
+        role: 'ADMIN',
+        emailVerifiedAt: null,
+      });
+      tenantsServiceMock.createForUser.mockResolvedValue({ id: 'tenant-9' });
+      credentialsStrategyMock.create.mockResolvedValue({
+        id: 'auth-method-9',
+        provider: CREDENTIALS_PROVIDER,
+      });
+
+      await service.register({
+        email: 'admin@example.com',
+        password: 'password123',
+        name: 'Admin',
+      });
+
+      expect(prismaTxMock.user.create).toHaveBeenCalledWith({
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        data: expect.objectContaining({ role: 'ADMIN' }),
+      });
     });
   });
 
@@ -160,11 +337,7 @@ describe('AuthService', () => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         expect.objectContaining({ emailVerifiedAt: expect.any(Date) }),
       );
-      expect(jwtServiceMock.signAsync).toHaveBeenCalledWith({
-        sub: 'user-1',
-        provider: CREDENTIALS_PROVIDER,
-        tenantId: 'tenant-1',
-      });
+      expect(jwtServiceMock.signAsync).toHaveBeenCalledWith(ACCESS_TOKEN);
       expect(refreshTokensServiceMock.generate).toHaveBeenCalledWith(
         'user-1',
         CREDENTIALS_PROVIDER,
@@ -210,18 +383,51 @@ describe('AuthService', () => {
         password: 'password123',
       });
 
-      expect(jwtServiceMock.signAsync).toHaveBeenCalledWith({
-        sub: 'user-1',
-        provider: CREDENTIALS_PROVIDER,
-        tenantId: 'tenant-1',
-      });
+      expect(jwtServiceMock.signAsync).toHaveBeenCalledWith(ACCESS_TOKEN);
       expect(result.accessToken).toBe('access-token');
       expect(result.refreshToken).toBe('refresh-token');
+    });
+
+    it('promotes allow-listed emails to the admin role', async () => {
+      configMock.adminEmails = ['admin@example.com'];
+      credentialsStrategyMock.authenticate.mockResolvedValue({
+        userId: 'user-9',
+        provider: CREDENTIALS_PROVIDER,
+      });
+      usersServiceMock.findOne.mockResolvedValue({
+        id: 'user-9',
+        email: 'admin@example.com',
+        name: 'Admin',
+        emailVerifiedAt: new Date(),
+        role: 'USER',
+      });
+      usersServiceMock.update.mockResolvedValue({
+        id: 'user-9',
+        email: 'admin@example.com',
+        name: 'Admin',
+        emailVerifiedAt: new Date(),
+        role: 'ADMIN',
+      });
+      tenantsServiceMock.findByUserId.mockResolvedValue({ id: 'tenant-1' });
+      jwtServiceMock.signAsync.mockResolvedValue('access-token');
+      refreshTokensServiceMock.generate.mockResolvedValue('refresh-token');
+
+      const result = await service.login({
+        email: 'admin@example.com',
+        password: 'password123',
+      });
+
+      expect(usersServiceMock.update).toHaveBeenCalledWith('user-9', {
+        role: 'ADMIN',
+      });
+      expect(result.user.role).toBe('ADMIN');
     });
   });
 
   describe('password reset', () => {
-    it('should send a reset email when the user has a credentials method', async () => {
+    const validResetNonce = 'reset-nonce-1';
+
+    const seedResetRequest = () => {
       usersServiceMock.findByEmail.mockResolvedValue({
         id: 'user-1',
         email: 'juan@example.com',
@@ -231,16 +437,44 @@ describe('AuthService', () => {
         id: 'method-1',
         userId: 'user-1',
       });
+      usersServiceMock.update.mockResolvedValue({ id: 'user-1' });
       jwtServiceMock.signAsync.mockResolvedValue('reset-token');
       mailServiceMock.sendPasswordResetEmail.mockResolvedValue(undefined);
+    };
+
+    const seedValidResetToken = () => {
+      jwtServiceMock.verifyAsync.mockResolvedValue({
+        sub: 'user-1',
+        purpose: 'password-reset',
+        jti: validResetNonce,
+      });
+      prismaMock.user.findUnique.mockResolvedValue({
+        id: 'user-1',
+        passwordResetTokenHash: hashNonce(validResetNonce),
+        passwordResetExpiresAt: new Date(Date.now() + 60_000),
+      });
+      prismaMock.user.updateMany.mockResolvedValue({ count: 1 });
+      credentialsStrategyMock.resetPassword.mockResolvedValue(undefined);
+    };
+
+    it('should send a reset email when the user has a credentials method', async () => {
+      seedResetRequest();
 
       await service.requestPasswordReset('juan@example.com');
       await new Promise((resolve) => setImmediate(resolve));
 
       expect(jwtServiceMock.signAsync).toHaveBeenCalledWith(
-        { sub: 'user-1', purpose: 'password-reset' },
+        {
+          sub: 'user-1',
+          purpose: 'password-reset',
+          jti: expect.any(String) as string,
+        },
         expect.objectContaining({ expiresIn: '1h' }),
       );
+      expect(usersServiceMock.update).toHaveBeenCalledWith('user-1', {
+        passwordResetTokenHash: expect.any(String) as string,
+        passwordResetExpiresAt: expect.any(Date) as Date,
+      });
       expect(mailServiceMock.sendPasswordResetEmail).toHaveBeenCalledWith(
         'juan@example.com',
         'Juan',
@@ -261,6 +495,7 @@ describe('AuthService', () => {
       await new Promise((resolve) => setImmediate(resolve));
 
       expect(mailServiceMock.sendPasswordResetEmail).not.toHaveBeenCalled();
+      expect(usersServiceMock.update).not.toHaveBeenCalled();
     });
 
     it('should not send an email when the user does not exist', async () => {
@@ -269,20 +504,30 @@ describe('AuthService', () => {
       await service.requestPasswordReset('unknown@example.com');
 
       expect(mailServiceMock.sendPasswordResetEmail).not.toHaveBeenCalled();
+      expect(usersServiceMock.update).not.toHaveBeenCalled();
     });
 
     it('should reset the password when the token is valid', async () => {
-      jwtServiceMock.verifyAsync.mockResolvedValue({
-        sub: 'user-1',
-        purpose: 'password-reset',
-      });
-      credentialsStrategyMock.resetPassword.mockResolvedValue(undefined);
+      seedValidResetToken();
 
       const result = await service.resetPassword('token', 'new-password-123');
 
+      expect(prismaMock.user.updateMany).toHaveBeenCalledWith({
+        where: {
+          id: 'user-1',
+          passwordResetTokenHash: hashNonce(validResetNonce),
+        },
+        data: {
+          passwordResetTokenHash: null,
+          passwordResetExpiresAt: null,
+        },
+      });
       expect(credentialsStrategyMock.resetPassword).toHaveBeenCalledWith(
         'user-1',
         'new-password-123',
+      );
+      expect(refreshTokensServiceMock.revokeAllForUser).toHaveBeenCalledWith(
+        'user-1',
       );
       expect(result).toEqual({ message: 'Password updated successfully' });
     });
@@ -299,11 +544,89 @@ describe('AuthService', () => {
       jwtServiceMock.verifyAsync.mockResolvedValue({
         sub: 'user-1',
         purpose: 'email-verification',
+        jti: validResetNonce,
       });
 
       await expect(
         service.resetPassword('token', 'new-password-123'),
       ).rejects.toBeInstanceOf(UnauthorizedException);
+    });
+
+    it('should throw when the reset token has no nonce', async () => {
+      jwtServiceMock.verifyAsync.mockResolvedValue({
+        sub: 'user-1',
+        purpose: 'password-reset',
+      });
+
+      await expect(
+        service.resetPassword('token', 'new-password-123'),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
+      expect(prismaMock.user.findUnique).not.toHaveBeenCalled();
+    });
+
+    it('should throw when the token was already used', async () => {
+      jwtServiceMock.verifyAsync.mockResolvedValue({
+        sub: 'user-1',
+        purpose: 'password-reset',
+        jti: validResetNonce,
+      });
+      prismaMock.user.findUnique.mockResolvedValue({
+        id: 'user-1',
+        passwordResetTokenHash: null,
+        passwordResetExpiresAt: null,
+      });
+
+      await expect(
+        service.resetPassword('token', 'new-password-123'),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
+      expect(credentialsStrategyMock.resetPassword).not.toHaveBeenCalled();
+    });
+
+    it('should throw when the reset token has expired in the database', async () => {
+      jwtServiceMock.verifyAsync.mockResolvedValue({
+        sub: 'user-1',
+        purpose: 'password-reset',
+        jti: validResetNonce,
+      });
+      prismaMock.user.findUnique.mockResolvedValue({
+        id: 'user-1',
+        passwordResetTokenHash: hashNonce(validResetNonce),
+        passwordResetExpiresAt: new Date(Date.now() - 1000),
+      });
+
+      await expect(
+        service.resetPassword('token', 'new-password-123'),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
+      expect(credentialsStrategyMock.resetPassword).not.toHaveBeenCalled();
+    });
+
+    it('should throw when the nonce does not match the stored hash', async () => {
+      jwtServiceMock.verifyAsync.mockResolvedValue({
+        sub: 'user-1',
+        purpose: 'password-reset',
+        jti: 'another-nonce',
+      });
+      prismaMock.user.findUnique.mockResolvedValue({
+        id: 'user-1',
+        passwordResetTokenHash: hashNonce(validResetNonce),
+        passwordResetExpiresAt: new Date(Date.now() + 60_000),
+      });
+
+      await expect(
+        service.resetPassword('token', 'new-password-123'),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
+      expect(credentialsStrategyMock.resetPassword).not.toHaveBeenCalled();
+    });
+
+    it('should throw when the token was consumed concurrently', async () => {
+      seedValidResetToken();
+      prismaMock.user.updateMany.mockResolvedValue({ count: 0 });
+
+      await expect(
+        service.resetPassword('token', 'new-password-123'),
+      ).rejects.toBeInstanceOf(UnauthorizedException);
+      expect(credentialsStrategyMock.resetPassword).not.toHaveBeenCalled();
+      expect(refreshTokensServiceMock.revokeAllForUser).not.toHaveBeenCalled();
     });
   });
 
@@ -314,6 +637,7 @@ describe('AuthService', () => {
         provider: CREDENTIALS_PROVIDER,
         token: 'new-refresh-token',
       });
+      usersServiceMock.findOne.mockResolvedValue({ id: 'user-1' });
       tenantsServiceMock.findByUserId.mockResolvedValue({ id: 'tenant-1' });
       jwtServiceMock.signAsync.mockResolvedValue('new-access-token');
 
@@ -322,11 +646,9 @@ describe('AuthService', () => {
       expect(refreshTokensServiceMock.rotate).toHaveBeenCalledWith(
         'old-refresh-token',
       );
-      expect(jwtServiceMock.signAsync).toHaveBeenCalledWith({
-        sub: 'user-1',
-        provider: CREDENTIALS_PROVIDER,
-        tenantId: 'tenant-1',
-      });
+      expect(usersServiceMock.findOne).toHaveBeenCalledWith('user-1');
+      expect(jwtServiceMock.signAsync).toHaveBeenCalledWith(ACCESS_TOKEN);
+      expect(result.user).toEqual({ id: 'user-1' });
       expect(result.accessToken).toBe('new-access-token');
       expect(result.refreshToken).toBe('new-refresh-token');
     });

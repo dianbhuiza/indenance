@@ -1,3 +1,5 @@
+import type { Prisma } from '../../../generated/prisma/client';
+
 export const AUTH_STRATEGIES = 'AUTH_STRATEGIES';
 
 export type AuthFlow = 'credentials' | 'oauth';
@@ -30,6 +32,7 @@ export interface AuthStrategy {
 
   create(
     input: CreateAuthMethodInput,
+    db?: Prisma.TransactionClient,
   ): Promise<{ id: string; provider: string }>;
 
   findMethod(

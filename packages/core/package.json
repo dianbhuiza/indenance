@@ -1,0 +1,38 @@
+{
+  "name": "@indenance/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch --preserveWatchOutput",
+    "lint": "oxlint"
+  },
+  "dependencies": {
+    "axios": "^1.20.0",
+    "zod": "^3.25.76",
+    "zustand": "^5.0.15"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": "^5.102.8",
+    "react": "^19.2.3"
+  },
+  "devDependencies": {
+    "@tanstack/react-query": "^5.102.8",
+    "@types/react": "^19.2.18",
+    "oxlint": "^1.79.0",
+    "react": "19.2.3",
+    "typescript": "~6.0.2"
+  }
+}
