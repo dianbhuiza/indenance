@@ -14,9 +14,13 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
   const config = app.get(AppConfig);
+  const allowedOrigins = config.frontendUrl
+    ? [config.frontendUrl]
+    : config.nodeEnv === 'production'
+      ? []
+      : true;
   app.enableCors({
-    origin:
-      config.frontendUrl ?? (config.nodeEnv === 'production' ? false : true),
+    origin: allowedOrigins,
     credentials: true,
   });
 

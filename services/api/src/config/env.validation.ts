@@ -1,9 +1,18 @@
 import { plainToInstance } from 'class-transformer';
-import { IsNumber, IsOptional, IsString, validateSync } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  MinLength,
+  ValidateIf,
+  validateSync,
+} from 'class-validator';
 
 class EnvironmentVariables {
   @IsOptional()
-  @IsString()
+  @IsEnum(['development', 'test', 'production'])
   NODE_ENV?: string;
 
   @IsString()
@@ -13,9 +22,15 @@ class EnvironmentVariables {
   @IsString()
   DIRECT_URL?: string;
 
-  @IsOptional()
   @IsString()
-  JWT_SECRET?: string;
+  @IsNotEmpty()
+  @MinLength(32)
+  JWT_SECRET!: string;
+
+  @ValidateIf((o: EnvironmentVariables) => o.NODE_ENV === 'production')
+  @IsString()
+  @IsNotEmpty()
+  FRONTEND_URL?: string;
 
   @IsOptional()
   @IsString()
@@ -36,10 +51,6 @@ class EnvironmentVariables {
   @IsOptional()
   @IsString()
   GOOGLE_CALLBACK_URL?: string;
-
-  @IsOptional()
-  @IsString()
-  FRONTEND_URL?: string;
 
   @IsOptional()
   @IsString()
