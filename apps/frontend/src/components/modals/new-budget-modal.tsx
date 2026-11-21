@@ -1,5 +1,22 @@
-import { Dialog } from '@/components/ui';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Dialog, Button, Select, Switch, Input } from '@/components/ui';
 import { X, PiggyBank } from 'lucide-react';
+import { z } from 'zod';
+import { api } from '@/lib/api';
+import {
+  getApiErrorMessage,
+  useCategoriesQuery,
+  INTERVALS,
+} from '@indenance/core';
+
+const budgetSchema = z.object({
+  name: z.string().min(1, 'El nombre es requerido').max(120, 'Muy largo'),
+  amount: z.coerce.number().int('Debe ser un número entero').min(1, 'Debe ser mayor a 0'),
+});
+
+type BudgetFormData = z.infer<typeof budgetSchema>;
 
 interface NewBudgetModalProps {
   open: boolean;
@@ -7,8 +24,44 @@ interface NewBudgetModalProps {
 }
 
 export function NewBudgetModal({ open, onOpenChange }: NewBudgetModalProps) {
+  const { data: categories = [] } = useCategoriesQuery({ enabled: open });
+  const [categoryId, setCategoryId] = useState('');
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [interval, setInterval] = useState('MONTHLY');
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<BudgetFormData>({
+    resolver: zodResolver(budgetSchema),
+    defaultValues: { name: '', amount: 0 },
+  });
+
+  const close = () => {
+    reset();
+    setCategoryId('');
+    setIsRecurring(false);
+    onOpenChange(false);
+  };
+
+  const onSubmit = async (data: BudgetFormData) => {
+    try {
+      await api.post('/budgets', {
+        name: data.name,
+        amount: data.amount,
+        ...(categoryId ? { categoryId } : {}),
+        ...(isRecurring ? { isRecurring: true, interval } : {}),
+      });
+      close();
+    } catch (err: unknown) {
+      alert(getApiErrorMessage(err, 'Error al crear el presupuesto'));
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={(next) => { if (!next) close(); else onOpenChange(true); }}>
       <Dialog.Portal>
         <Dialog.Backdrop />
         <Dialog.Popup>
@@ -19,7 +72,7 @@ export function NewBudgetModal({ open, onOpenChange }: NewBudgetModalProps) {
               </div>
               <div>
                 <Dialog.Title>Nuevo presupuesto</Dialog.Title>
-                <Dialog.Description>Establece un límite de gasto mensual</Dialog.Description>
+                <Dialog.Description>Establece un límite de gasto</Dialog.Description>
               </div>
             </div>
             <Dialog.Close className="flex h-8 w-8 items-center justify-center rounded-lg text-text-muted hover:bg-surface-raised hover:text-text transition-colors">
@@ -27,51 +80,85 @@ export function NewBudgetModal({ open, onOpenChange }: NewBudgetModalProps) {
             </Dialog.Close>
           </div>
 
-          <div className="mt-6 space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
             <div>
-              <label className="block text-sm font-medium text-text mb-1.5">Categoría</label>
-              <select className="w-full rounded-xl border border-border bg-surface px-4 py-2.5 text-sm text-text focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-colors">
-                <option>Seleccionar categoría...</option>
-                <option>Alimentación</option>
-                <option>Transporte</option>
-                <option>Entretenimiento</option>
-                <option>Salud</option>
-                <option>Servicios</option>
-                <option>Otro</option>
-              </select>
+              <label className="block text-sm font-medium text-text mb-1.5">Nombre</label>
+              <Input placeholder="Ej. Alimentación" {...register('name')} />
+              {errors.name && <p className="mt-1 text-xs text-danger-600">{errors.name.message}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-text mb-1.5">Límite mensual</label>
+              <label className="block text-sm font-medium text-text mb-1.5">Límite</label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-text-muted">$</span>
                 <input
                   type="number"
-                  placeholder="0.00"
+                  min={1}
+                  step={1}
+                  placeholder="0"
+                  {...register('amount')}
                   className="w-full rounded-xl border border-border bg-surface py-2.5 pl-7 pr-4 text-sm text-text placeholder:text-text-muted focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-colors"
                 />
               </div>
+              {errors.amount && <p className="mt-1 text-xs text-danger-600">{errors.amount.message}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-text mb-1.5">Alerta al alcanzar</label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  placeholder="80"
-                  defaultValue={80}
-                  className="w-20 rounded-xl border border-border bg-surface px-3 py-2.5 text-sm text-text text-center focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 transition-colors"
-                />
-                <span className="text-sm text-text-muted">% del límite</span>
-              </div>
+              <label className="block text-sm font-medium text-text mb-1.5">Categoría</label>
+              <Select value={categoryId} onValueChange={setCategoryId}>
+                <Select.Trigger className="w-full">
+                  <Select.Value placeholder="Sin categoría" />
+                </Select.Trigger>
+                <Select.Portal>
+                  <Select.Positioner>
+                    <Select.Popup>
+                      <Select.Item value="">Sin categoría</Select.Item>
+                      {categories.map((category: { id: string; name: string }) => (
+                        <Select.Item key={category.id} value={category.id}>
+                          {category.name}
+                        </Select.Item>
+                      ))}
+                    </Select.Popup>
+                  </Select.Positioner>
+                </Select.Portal>
+              </Select>
             </div>
 
-            <button className="w-full rounded-xl bg-violet-600 py-3 text-sm font-semibold text-white hover:bg-violet-700 transition-colors mt-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-text">Presupuesto recurrente</span>
+              <Switch checked={isRecurring} onCheckedChange={setIsRecurring} />
+            </div>
+
+            {isRecurring && (
+              <div>
+                <label className="block text-sm font-medium text-text mb-1.5">Frecuencia</label>
+                <Select value={interval} onValueChange={setInterval}>
+                  <Select.Trigger className="w-full">
+                    <Select.Value placeholder="Mensual" />
+                  </Select.Trigger>
+                  <Select.Portal>
+                    <Select.Positioner>
+                      <Select.Popup>
+                        {INTERVALS.map((entry) => (
+                          <Select.Item key={entry.value} value={entry.value}>
+                            {entry.label}
+                          </Select.Item>
+                        ))}
+                      </Select.Popup>
+                    </Select.Positioner>
+                  </Select.Portal>
+                </Select>
+              </div>
+            )}
+
+            <Button type="submit" className="w-full" size="lg" loading={isSubmitting}>
               Crear presupuesto
-            </button>
-          </div>
+            </Button>
+          </form>
         </Dialog.Popup>
       </Dialog.Portal>
     </Dialog>
   );
 }
+
+export default NewBudgetModal;

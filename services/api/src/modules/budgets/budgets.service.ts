@@ -203,8 +203,10 @@ export class BudgetsService {
         budget.interval,
         budget.endDate,
       );
-      const spent = await this.spendInPeriod(tx, tenantId, budget, start, end);
-      const overLimit = spent + amount > budget.amount;
+       const spent = await this.spendInPeriod(tx, tenantId, budget, start, end);
+       // `spent` already includes the expense just inserted in this transaction,
+       // so do not add `amount` again.
+       const overLimit = spent > budget.amount;
       if (overLimit && !budget.exceededAt) {
         await tx.budget.update({
           where: { id: budget.id },

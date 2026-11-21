@@ -46,6 +46,7 @@ export interface Budget {
   spent: number;
   remaining: number;
   isExceeded: boolean;
+  isActive: boolean;
 }
 
 export interface Category {

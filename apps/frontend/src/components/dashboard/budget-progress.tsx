@@ -1,5 +1,5 @@
 import { Target } from 'lucide-react';
-import { useBudgetsQuery, computeBudgetProgress, formatNumber } from '@indenance/core';
+import { useBudgetsQuery, computeBudgetProgress, formatNumber, getMonthLabel } from '@indenance/core';
 import { Button } from '@/components/ui';
 
 const colorMap = {
@@ -61,7 +61,7 @@ export function BudgetProgress({ onCreateBudget }: BudgetProgressProps) {
     <div className="rounded-2xl border border-border bg-surface p-5 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="font-display text-lg text-text">Presupuestos</h3>
-        <span className="text-xs text-text-muted">Septiembre</span>
+        <span className="text-xs text-text-muted">{getMonthLabel(new Date())}</span>
       </div>
 
       <div className="space-y-4">

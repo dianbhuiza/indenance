@@ -321,9 +321,9 @@ describe('BudgetsService', () => {
 
   describe('applyExpense', () => {
     it('marks a budget as exceeded when spent plus amount surpasses the limit', async () => {
-      txMock.budget.findMany.mockResolvedValue([budgetMock]);
-      txMock.transaction.aggregate.mockResolvedValue({ _sum: { amount: 900 } });
-      txMock.budget.update.mockResolvedValue(budgetMock);
+       txMock.budget.findMany.mockResolvedValue([budgetMock]);
+       txMock.transaction.aggregate.mockResolvedValue({ _sum: { amount: 1100 } });
+       txMock.budget.update.mockResolvedValue(budgetMock);
 
       await service.applyExpense(
         txMock as never,
@@ -402,7 +402,7 @@ describe('BudgetsService', () => {
       txMock.budget.findMany.mockResolvedValue([
         { ...budgetMock, categoryId: null },
       ]);
-      txMock.transaction.aggregate.mockResolvedValue({ _sum: { amount: 900 } });
+       txMock.transaction.aggregate.mockResolvedValue({ _sum: { amount: 1100 } });
       txMock.budget.update.mockResolvedValue(budgetMock);
 
       await service.applyExpense(
